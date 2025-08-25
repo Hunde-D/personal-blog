@@ -29,6 +29,19 @@ export const postRouter = createTRPCRouter({
       posts.push(post);
       return post;
     }),
+  createNewsLatter: publicProcedure
+    .input(z.object({ email: z.string().min(1) }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.newsletter.create({
+        data: {
+          email: input.email,
+        },
+      });
+    }),
+
+  getNewsLatter: publicProcedure.query(async ({ ctx }) => {
+    return ctx.db.newsletter.findMany();
+  }),
 
   getLatest: publicProcedure.query(() => {
     return posts.at(-1) ?? null;
