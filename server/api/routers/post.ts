@@ -1,5 +1,5 @@
 import z from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 interface Post {
   id: number;
@@ -21,22 +21,26 @@ export const postRouter = createTRPCRouter({
     }),
   create: publicProcedure
     .input(z.object({ name: z.string().min(1) }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
       const post: Post = {
         id: posts.length + 1,
         name: input.name,
       };
+      console.log("ctx.db.user.findMany =>>", await ctx.db.user.findMany());
+      console.log("ctx.user =>>", ctx.user);
       posts.push(post);
       return post;
     }),
-  createNewsLatter: publicProcedure
+  createNewsLatter: protectedProcedure
     .input(z.object({ email: z.string().min(1) }))
     .mutation(async ({ ctx, input }) => {
-      return ctx.db.newsletter.create({
+      const result = await ctx.db.newsletter.create({
         data: {
           email: input.email,
         },
       });
+      console.log("ctx.db.newsletter.create7 =>>", result.email);
+      return result;
     }),
 
   getNewsLatter: publicProcedure.query(async ({ ctx }) => {
@@ -45,5 +49,14 @@ export const postRouter = createTRPCRouter({
 
   getLatest: publicProcedure.query(() => {
     return posts.at(-1) ?? null;
+  }),
+
+  user: protectedProcedure.query(({ ctx }) => {
+    const user = ctx.db.user.findUnique({
+      where: { id: ctx.user.id },
+    });
+    console.log("userCtx =>>", ctx.user);
+    console.log("userDb =>>>>", user);
+    return user;
   }),
 });

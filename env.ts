@@ -4,6 +4,8 @@ const EnvSchema = z.object({
   NODE_ENV: z.string().default("development"),
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.url(),
+  BETTER_AUTH_SECRET: z.string().min(10),
+  BETTER_AUTH_URL: z.url().default("http://localhost:3000"),
 });
 // .superRefine((input, ctx) => {
 //   if (input.NODE_ENV === "production" && !input.DATABASE_AUTH_TOKEN) {
