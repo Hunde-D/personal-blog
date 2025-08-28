@@ -1,37 +1,35 @@
 import Link from "next/link";
+import { MarkdownRenderer } from "./markdown-renderer";
+import { Twitter } from "lucide-react";
+
+const content = `
+# Hi, I'm Hunde 👋
+
+I’m a **software engineer** on a journey to keep learning, building, and sharing along the way.
+I love turning ideas into apps 💡, breaking down tricky problems 🧩, and reflecting on what I discover as I grow ✨.
+
+---
+
+> 🎮 Outside of coding, I enjoy gaming — especially *Call of Duty* —
+> 🚶‍♂️ and taking long walks when the sun goes down.
+> These hobbies help me **recharge, stay inspired, and approach challenges with fresh eyes.**
+
+---
+
+This blog is my little corner of the internet 🌍 —
+a place to **document my progress**, stay accountable ✅,
+and (hopefully) inspire anyone else walking their own coding path 👣.
+
+---
+
+☕ Thanks for stopping by — grab a coffee and join me on this journey!
+`;
 
 export function Hero() {
   return (
     <section>
-      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 text-balance">
-        Hi, I'm Hunde 👋
-      </h1>
-
-      <div className="text-base sm:text-lg text-muted-foreground leading-relaxed space-y-4 mb-6 sm:mb-8">
-        <p>
-          I'm a software engineer passionate about building apps and sharing
-          what I learn along the way. My main focus is on{" "}
-          <strong>Flutter</strong> (with clean architecture), but I also dive
-          into <strong>React</strong>, <strong>Next.js</strong>,
-          <strong>Vue</strong>, and backend tools like{" "}
-          <strong>Node.js / Express</strong> and <strong>Hono</strong>.
-        </p>
-
-        <p>
-          This blog is where I document my coding journey—from debugging tricky
-          errors and testing Cubits in Flutter, to setting up Firestore
-          backends, trying new frameworks, and exploring developer productivity
-          tools.
-        </p>
-
-        <p>
-          Thanks for stopping by—grab a coffee ☕ and join me as I break down
-          tech concepts, share tips, and reflect on the ups and downs of being a
-          dev.
-        </p>
-      </div>
-
-      <div className="flex items-center gap-3 sm:gap-4">
+      <MarkdownRenderer content={content} />
+      <div className="flex items-center gap-4 sm:gap-4">
         <Link
           href="https://twitter.com"
           className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -42,7 +40,7 @@ export function Hero() {
           </svg>
         </Link>
         <Link
-          href="https://github.com/hundedesalegn"
+          href="https://github.com/Hunde-D"
           className="text-muted-foreground hover:text-foreground transition-colors p-1"
           aria-label="GitHub"
         >
@@ -51,7 +49,7 @@ export function Hero() {
           </svg>
         </Link>
         <Link
-          href="https://linkedin.com/in/hundedesalegn"
+          href="https://linkedin.com/in"
           className="text-muted-foreground hover:text-foreground transition-colors p-1"
           aria-label="LinkedIn"
         >
@@ -60,7 +58,7 @@ export function Hero() {
           </svg>
         </Link>
         <Link
-          href="https://dev.to/hundedesalegn"
+          href="https://dev.to"
           className="text-muted-foreground hover:text-foreground transition-colors p-1"
           aria-label="Dev.to"
         >

@@ -4,6 +4,7 @@ import "./globals.css";
 import { TRPCReactProvider } from "@/trpc/react";
 import { Navigation } from "@/components/layout/navigation";
 import { Footer } from "@/components/layout/footer";
+import { ThemeProvider } from "@/provider/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,23 +27,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <TRPCReactProvider>
-          <div className="relative min-h-screen bg-background max-w-4xl overflow-x-hidden mx-auto">
-            <header className="mt-5">
-              <Navigation />
-            </header>
-            <main className="border mx-4 border-t-0">
-              <div className="mx-auto w-full px-4 sm:px-6 py-8 sm:py-16">
-                {children}
-              </div>
-              <Footer />
-            </main>
-          </div>
-        </TRPCReactProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TRPCReactProvider>
+            <div className="relative flex flex-col min-h-screen bg-background max-w-4xl overflow-x-hidden mx-auto">
+              <header className="mt-5">
+                <Navigation />
+              </header>
+              <main className="border flex flex-col flex-1 mx-4 border-t-0 h-full">
+                <div className="mx-auto w-full px-4 sm:px-6 py-8 sm:py-16 flex-1 grid">
+                  {children}
+                </div>
+                <Footer />
+              </main>
+            </div>
+          </TRPCReactProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

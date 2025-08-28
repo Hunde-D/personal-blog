@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { ModeToggle } from "../ui/mode-toggle";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -28,7 +29,7 @@ export function Navigation() {
         <Link href="/" className="flex items-center">
           <Avatar className="size-12 rounded-md">
             <AvatarImage src="/profile.png" />
-            <AvatarFallback>HD</AvatarFallback>
+            <AvatarFallback className="text-primary">HD</AvatarFallback>
           </Avatar>
         </Link>
 
@@ -40,8 +41,8 @@ export function Navigation() {
               className={cn(
                 "transition-colors text-sm lg:text-base",
                 pathname === item.href
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "text-primary font-medium"
+                  : "text-muted-foreground hover:text-primary"
               )}
             >
               {item.label}
@@ -55,26 +56,14 @@ export function Navigation() {
               className={cn(
                 "transition-colors text-sm lg:text-base",
                 pathname === item.href || pathname.startsWith(item.href)
-                  ? "text-blue-400 font-medium"
-                  : "text-muted-foreground hover:text-blue-400"
+                  ? "text-primary font-medium"
+                  : "text-muted-foreground hover:text-primary"
               )}
             >
               {item.label}
             </Link>
           ))}
-          <button className="text-muted-foreground hover:text-foreground transition-colors">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <circle cx="12" cy="12" r="5" />
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-            </svg>
-          </button>
+          <ModeToggle />
         </div>
 
         <button

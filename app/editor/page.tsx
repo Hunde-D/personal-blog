@@ -5,14 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Eye, Save, ArrowLeft } from "lucide-react";
-import type { BlogPostType } from "@/components/blog/types";
 import { Preview } from "@/components/blog/preview";
 import { api } from "@/trpc/react";
+import { PostCT } from "@/components/blog/types";
 
 export default function EditorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [postData, setPostData] = useState<BlogPostType>({
+  const [postData, setPostData] = useState<PostCT>({
     title: "Untitled Post",
     content: "",
     excerpt: "",
@@ -38,18 +38,21 @@ export default function EditorPage() {
   }, [foundPost]);
 
   const createPost = api.post.admin.create.useMutation({
-    onSuccess: () => {
-      router.push("/editor/manage");
+    onSuccess: (post) => {
+      utils.post.invalidate();
+      router.push(`/blog/${post.slug}`);
     },
     onError: (error) => {
       console.error("Error creating post:", error);
       alert("Failed to create post");
     },
   });
+  const utils = api.useUtils();
 
-  const updatePost = api.post.admin.update.useMutation({
-    onSuccess: () => {
-      router.push("/editor/manage");
+  const mutatePost = api.post.admin.mutate.useMutation({
+    onSuccess: (post) => {
+      utils.post.find.invalidate({ slug: post.slug });
+      router.push(`/blog/${post.slug}`);
     },
     onError: (error) => {
       console.error("Error updating post:", error);
@@ -66,8 +69,8 @@ export default function EditorPage() {
       alert("Post not found for updating.");
       return;
     }
-    updatePost.mutate({ ...foundPost, ...postData });
-  }, [updatePost, postData, foundPost]);
+    mutatePost.mutate({ id: foundPost.id, ...postData });
+  }, [mutatePost, postData, foundPost]);
 
   if (isLoading) {
     return <div>Loading post data...</div>;
@@ -159,11 +162,11 @@ export default function EditorPage() {
               <Button
                 onClick={slug ? handleUpdate : handleSubmit}
                 className="flex items-center gap-2"
-                disabled={slug ? updatePost.isPending : createPost.isPending}
+                disabled={slug ? mutatePost.isPending : createPost.isPending}
               >
                 <Save className="w-4 h-4" />
                 {slug
-                  ? updatePost.isPending
+                  ? mutatePost.isPending
                     ? "Updating..."
                     : "Update Post"
                   : createPost.isPending
@@ -171,22 +174,12 @@ export default function EditorPage() {
                   : "Save Post"}
               </Button>
               <Button
-                // variant="outline"
                 onClick={() => setIsPreview(!isPreview)}
                 className="flex items-center gap-2 bg-secondary text-secondary-foreground"
               >
                 <Eye className="w-4 h-4" />
                 {isPreview ? "Hide Preview" : "Show Preview"}
               </Button>
-              {/* {editingSlug && (
-                  <Button
-                    variant="outline"
-                    // onClick={handleNewPost}
-                    className="flex items-center gap-2 border-gray-700 text-white hover:bg-gray-800 bg-transparent"
-                  >
-                    New Post
-                  </Button>
-                )} */}
             </div>
           </div>
         </div>

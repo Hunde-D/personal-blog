@@ -42,7 +42,7 @@ model Post {
   slug        String  @unique
   content     String
   coverImage  String?
-  readTimeMin Int
+  readTimeMin Int?
 
   published   Boolean   @default(false)
   publishedAt DateTime?

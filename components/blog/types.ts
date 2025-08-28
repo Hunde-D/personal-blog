@@ -1,7 +1,20 @@
-import { Prisma } from "@prisma/client";
+import z from "zod";
+import { PostCreateSchema, PostMutateSchema } from "./validation";
 
-export interface BlogPostType {
+export type PostT = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
   title: string;
+  excerpt: string | null;
+  slug: string;
   content: string;
-  excerpt: string;
-}
+  coverImage: string | null;
+  readTimeMin: number | null;
+  published: boolean;
+  publishedAt: Date | null;
+  authorId: string;
+};
+
+export type PostCT = z.infer<typeof PostCreateSchema>;
+export type PostMT = z.infer<typeof PostMutateSchema>;

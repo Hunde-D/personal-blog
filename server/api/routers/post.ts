@@ -2,28 +2,47 @@ import z from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { Prisma } from "@prisma/client";
 import slug from "slug";
-const PostSchema = z.object({
-  title: z.string().min(2).max(100),
-  content: z.string().min(10).max(5000),
-  excerpt: z.string().min(2).max(200),
-});
-const PostUpdateSchema = z.object({
-  id: z.string(),
-  title: z.string().min(2).max(100),
-  content: z.string().min(10).max(5000),
-  excerpt: z.string().min(2).max(200),
-});
+import {
+  PostCreateSchema,
+  PostSelectSchema,
+  PostMutateSchema,
+} from "@/components/blog/validation";
 
 export const postRouter = createTRPCRouter({
-  infinitePosts: publicProcedure
-    .input(
-      z.object({
-        limit: z.number().min(1).max(20).default(2),
-        cursor: z.string().nullish(),
-        direction: z.enum(["forward", "backward"]),
-        query: z.string().optional(),
-      })
-    )
+  listPublished: publicProcedure
+    .input(PostSelectSchema)
+    .query(async ({ ctx, input }) => {
+      const { limit, cursor, query } = input;
+      const where: Prisma.PostWhereInput = {
+        published: true,
+      };
+      if (query) {
+        const tsQuery = query.split(/\s+/).filter(Boolean).join(" & "); // "about me" => "about & me"
+        where.OR = [
+          { title: { search: tsQuery } },
+          { excerpt: { search: tsQuery } },
+        ];
+      }
+      const posts = await ctx.db.post.findMany({
+        where,
+        take: limit + 1,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: {
+          publishedAt: "desc",
+        },
+      });
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (posts.length > limit) {
+        const nextItem = posts.pop();
+        nextCursor = nextItem?.id;
+      }
+      return {
+        posts,
+        nextCursor,
+      };
+    }),
+  listAll: publicProcedure
+    .input(PostSelectSchema)
     .query(async ({ ctx, input }) => {
       const { limit, cursor, query } = input;
       const where: Prisma.PostWhereInput = {};
@@ -39,7 +58,7 @@ export const postRouter = createTRPCRouter({
         take: limit + 1,
         cursor: cursor ? { id: cursor } : undefined,
         orderBy: {
-          publishedAt: "asc",
+          createdAt: "desc",
         },
       });
       let nextCursor: typeof cursor | undefined = undefined;
@@ -53,7 +72,10 @@ export const postRouter = createTRPCRouter({
       };
     }),
   list: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.db.post.findMany();
+    return await ctx.db.post.findMany({
+      where: { published: true },
+      orderBy: { publishedAt: "desc" },
+    });
   }),
   find: publicProcedure
     .input(z.object({ slug: z.string() }))
@@ -66,7 +88,7 @@ export const postRouter = createTRPCRouter({
     }),
   admin: createTRPCRouter({
     create: protectedProcedure
-      .input(PostSchema)
+      .input(PostCreateSchema)
       .mutation(async ({ ctx, input }) => {
         const result = await ctx.db.post.create({
           data: {
@@ -80,17 +102,15 @@ export const postRouter = createTRPCRouter({
         });
         return result;
       }),
-    update: protectedProcedure
-      .input(PostUpdateSchema)
+    mutate: protectedProcedure
+      .input(PostMutateSchema)
       .mutation(async ({ ctx, input }) => {
+        const { id, title, ...rest } = input;
         const result = await ctx.db.post.update({
-          where: { id: input.id },
+          where: { id },
           data: {
-            title: input.title,
-            excerpt: input.excerpt,
-            content: input.content,
-            slug: slug(input.title),
-            readTimeMin: 500,
+            ...rest,
+            ...(title ? { title, slug: slug(title) } : {}),
           },
         });
         return result;

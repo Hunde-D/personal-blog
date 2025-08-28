@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export const metadata = {
-  title: "Newsletter - Paulina's Blog",
+  title: "Newsletter - Hunde's Blog",
   description:
     "Subscribe to get the latest posts and coding insights delivered to your inbox",
 };

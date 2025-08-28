@@ -1,8 +1,6 @@
-import { Navigation } from "@/components/layout/navigation";
-import { Footer } from "@/components/layout/footer";
 import { BlogPost } from "@/components/blog/blog-post";
-import { blogPosts } from "@/lib/blog-data";
 import { notFound } from "next/navigation";
+import { api } from "@/trpc/server";
 
 interface BlogPostPageProps {
   params: {
@@ -10,14 +8,8 @@ interface BlogPostPageProps {
   };
 }
 
-export function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }));
-}
-
-export function generateMetadata({ params }: BlogPostPageProps) {
-  const post = blogPosts.find((post) => post.slug === params.slug);
+export const generateMetadata = async ({ params }: BlogPostPageProps) => {
+  const post = await api.post.find({ slug: params.slug });
 
   if (!post) {
     return {
@@ -26,21 +18,18 @@ export function generateMetadata({ params }: BlogPostPageProps) {
   }
 
   return {
-    title: `${post.title} - Paulina's Blog`,
+    title: post.title,
     description: post.excerpt,
   };
-}
+};
 
-export default function BlogPostPage({ params }: BlogPostPageProps) {
-  const post = blogPosts.find((post) => post.slug === params.slug);
-
+const BlogPostPage = async ({ params }: BlogPostPageProps) => {
+  const post = await api.post.find({ slug: params.slug });
   if (!post) {
     notFound();
   }
 
-  return (
-    <div>
-      <BlogPost post={post} />
-    </div>
-  );
-}
+  return <BlogPost post={post} />;
+};
+
+export default BlogPostPage;

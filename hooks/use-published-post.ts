@@ -1,10 +1,10 @@
 import { api } from "@/trpc/react";
 import { useSearchParams } from "next/navigation";
 
-export const useInfinitePost = (limit: number = 5) => {
+export const usePublishedPost = (limit: number = 5) => {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("query") || undefined;
-  const query = api.post.infinitePosts.useInfiniteQuery(
+  const query = api.post.listPublished.useInfiniteQuery(
     {
       limit,
       query: queryParam,
@@ -13,6 +13,6 @@ export const useInfinitePost = (limit: number = 5) => {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
     }
   );
-  const allPosts = query.data?.pages.flatMap((p) => p.posts) ?? [];
-  return { ...query, allPosts };
+  const publishedPosts = query.data?.pages.flatMap((p) => p.posts) ?? [];
+  return { ...query, publishedPosts };
 };

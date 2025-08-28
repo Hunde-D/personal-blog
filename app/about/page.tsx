@@ -1,68 +1,56 @@
-import { Navigation } from "@/components/layout/navigation";
-import { Footer } from "@/components/layout/footer";
-import Image from "next/image";
+import { MarkdownRenderer } from "@/components/blog/markdown-renderer";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const metadata = {
   title: "About - Hunde's Blog",
   description:
-    "Learn more about Hunde Desalegn, a software engineer passionate about Flutter, React, and building scalable apps.",
+    "Learn more about Hunde Desalegn, a software engineer passionate about learning, building, and sharing.",
 };
+
+const content = `
+# About Me 🙋‍♂️
+
+Hi there! I'm **Hunde Desalegn**, a curious mind who loves turning ideas into reality ✨.  
+For me, software engineering is more than code — it’s about solving problems, telling stories through design, and building things that make life just a little bit easier.
+
+---
+
+## 🌱 My Journey  
+I’m constantly learning, experimenting, and reflecting along the way.  
+What excites me most is:  
+- 💡 Breaking down complex problems into simple solutions  
+- 🔨 Building projects that challenge me to grow  
+- ✍️ Sharing lessons learned to help others on their journey  
+
+---
+
+## 💡 Beyond Work  
+> "Small daily habits compound into big wins — in life and in code."  
+
+Outside of my projects, I enjoy activities that help me recharge and spark creativity — whether that’s gaming 🎮, long evening walks 🚶‍♂️, or diving into self-improvement 📖.  
+
+These small routines keep me grounded and inspired.
+
+---
+
+## 🌍 Why This Blog?  
+This blog is my space to **document my journey**, stay accountable, and connect with others walking their own path.  
+
+If you’re someone who loves learning, creating, or just exploring new ideas — welcome aboard ☕🚀.
+`;
 
 export default function AboutPage() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 sm:gap-8 items-center lg:items-start">
-      <div className="flex-shrink-0">
-        <Image
-          src="/profile-hunde.png"
-          alt="Hunde's profile"
-          width={200}
-          height={200}
-          className="rounded-full w-32 h-32 sm:w-48 sm:h-48 lg:w-52 lg:h-52"
-        />
+      <div className="flex-shrink-0 size-56">
+        <Avatar className="size-40 rounded-full">
+          <AvatarImage src="/profile.png" />
+          <AvatarFallback className="text-lg">HD</AvatarFallback>
+        </Avatar>
       </div>
 
       <div className="flex-1 text-center lg:text-left">
-        <h1 className="text-3xl sm:text-4xl font-bold mb-4 sm:mb-6 text-balance">
-          About Me
-        </h1>
-
-        <div className="space-y-4 sm:space-y-6 text-base sm:text-lg leading-relaxed">
-          <p>
-            Hi there! I'm <span className="font-semibold">Hunde Desalegn</span>,
-            a software engineer passionate about building apps with{" "}
-            <strong>Flutter, React, and Next.js</strong>. I enjoy experimenting
-            with different architectures, especially{" "}
-            <strong>Clean Architecture</strong>, and applying them to both
-            mobile and web projects.
-          </p>
-
-          <p>
-            On the backend side, I’ve worked with{" "}
-            <strong>Express, Node.js, and Firestore</strong> to power my apps. I
-            like designing APIs that are simple but flexible, and connecting
-            them with clean, testable frontends.
-          </p>
-
-          <p>
-            This blog is my space to share lessons I’ve learned while building
-            projects like a <strong>habit tracker app</strong>, a{" "}
-            <strong>shoe store with Firestore backend</strong>, and
-            experimenting with <strong>Vue</strong> and other frontend
-            frameworks.
-          </p>
-
-          <p>
-            Outside of coding, I’m passionate about productivity and
-            self-improvement. I believe small daily habits compound into big
-            wins — in life and in code.
-          </p>
-
-          <p>
-            I started this blog to document my journey, share what I learn, and
-            connect with other developers. If you're into Flutter, React, or
-            just building cool things on the web, I’d love to connect with you!
-          </p>
-        </div>
+        <MarkdownRenderer content={content} />
       </div>
     </div>
   );
