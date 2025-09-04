@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 
+type TagOption = { id: string; name: string; postCount?: number };
+
 interface TagFilterProps {
   selectedTags: Array<{ id?: string; name: string }>;
   onTagsChange: (tags: Array<{ id?: string; name: string }>) => void;
@@ -30,7 +32,7 @@ export const TagFilter = ({
   const { data: tags = [], isLoading } = api.post.getTags.useQuery();
 
   // Filter tags based on search term
-  const filteredTags = tags.filter((tag: { id?: string; name: string }) =>
+  const filteredTags: TagOption[] = (tags as TagOption[]).filter((tag) =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -129,7 +131,7 @@ export const TagFilter = ({
                 </div>
               ) : (
                 <div className="p-2">
-                  {filteredTags.map((tag) => (
+                  {filteredTags.map((tag: TagOption) => (
                     <button
                       key={tag.id}
                       onClick={() => handleTagToggle(tag)}
