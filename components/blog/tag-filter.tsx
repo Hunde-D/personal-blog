@@ -30,7 +30,7 @@ export const TagFilter = ({
   const { data: tags = [], isLoading } = api.post.getTags.useQuery();
 
   // Filter tags based on search term
-  const filteredTags = tags.filter((tag) =>
+  const filteredTags = tags.filter((tag: { id?: string; name: string }) =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -94,7 +94,9 @@ export const TagFilter = ({
             <Filter className="h-4 w-4" />
             <span className="truncate">
               {selectedTags.length > 0
-                ? `${selectedTags.length} tag${selectedTags.length === 1 ? "" : "s"} selected`
+                ? `${selectedTags.length} tag${
+                    selectedTags.length === 1 ? "" : "s"
+                  } selected`
                 : placeholder}
             </span>
           </div>
@@ -133,7 +135,8 @@ export const TagFilter = ({
                       onClick={() => handleTagToggle(tag)}
                       className={cn(
                         "w-full text-left px-3 py-2 rounded-md text-sm transition-colors hover:bg-accent",
-                        selectedTags.some((t) => t.name === tag.name) && "bg-primary text-primary-foreground"
+                        selectedTags.some((t) => t.name === tag.name) &&
+                          "bg-primary text-primary-foreground"
                       )}
                     >
                       <div className="flex items-center justify-between">
@@ -158,12 +161,8 @@ export const TagFilter = ({
 
       {/* Click outside to close */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       )}
     </div>
   );
 };
-
