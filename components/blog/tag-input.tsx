@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/trpc/react";
 import { cn } from "@/lib/utils";
 
+type TagOption = { id: string; name: string; postCount?: number };
+
 interface TagInputProps {
   tags: Array<{ id?: string; name: string }>;
   onTagsChange: (tags: Array<{ id?: string; name: string }>) => void;
@@ -30,7 +32,8 @@ export const TagInput = ({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Fetch existing tags for suggestions
-  const { data: existingTags = [] } = api.post.getTags.useQuery();
+  const { data: existingTagsData = [] } = api.post.getTags.useQuery();
+  const existingTags: TagOption[] = existingTagsData as TagOption[];
 
   const handleAddTag = (tag: string | { id: string; name: string }) => {
     const fromSuggestion = typeof tag !== "string";
@@ -55,7 +58,7 @@ export const TagInput = ({
     // If a suggestion exists for this name, use its id to connect instead of creating new
     const existing = fromSuggestion
       ? (tag as { id: string; name: string })
-      : existingTags.find((t: any) => t.name.toLowerCase() === lower);
+      : existingTags.find((t: TagOption) => t.name.toLowerCase() === lower);
 
     if (existing) {
       onTagsChange([...tags, { id: existing.id, name: existing.name }]);
@@ -96,7 +99,7 @@ export const TagInput = ({
 
   // Filter existing tags to show only those not already selected
   const availableTags = existingTags
-    .filter((tag) => !tags.some((t) => t.name === tag.name))
+    .filter((tag: TagOption) => !tags.some((t) => t.name === tag.name))
     .slice(0, 8); // Show suggestions
 
   return (
@@ -104,18 +107,18 @@ export const TagInput = ({
       {/* Tags Display */}
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-          <Badge
-            key={tag.name}
-            variant="secondary"
-            className="flex items-center gap-1 hover:bg-destructive hover:text-destructive-foreground cursor-pointer transition-colors"
-            onClick={() => !disabled && handleRemoveTag(tag.name)}
-          >
-            <Tag className="h-3 w-3" />
-            {tag.name}
-            {!disabled && <X className="h-3 w-3" />}
-          </Badge>
-        ))}
+          {tags.map((tag) => (
+            <Badge
+              key={tag.name}
+              variant="secondary"
+              className="flex items-center gap-1 hover:bg-destructive hover:text-destructive-foreground cursor-pointer transition-colors"
+              onClick={() => !disabled && handleRemoveTag(tag.name)}
+            >
+              <Tag className="h-3 w-3" />
+              {tag.name}
+              {!disabled && <X className="h-3 w-3" />}
+            </Badge>
+          ))}
         </div>
       )}
 
@@ -123,7 +126,9 @@ export const TagInput = ({
       <div className="relative">
         <Input
           ref={inputRef}
-          placeholder={tags.length >= maxTags ? "Maximum tags reached" : placeholder}
+          placeholder={
+            tags.length >= maxTags ? "Maximum tags reached" : placeholder
+          }
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleInputKeyDown}
@@ -132,7 +137,7 @@ export const TagInput = ({
           disabled={disabled || tags.length >= maxTags}
           className="pr-20"
         />
-        
+
         {/* Add Button */}
         {inputValue.trim() && (
           <Button
@@ -151,10 +156,12 @@ export const TagInput = ({
       {isInputFocused && (
         <div className="absolute z-50 mt-1 w-full bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
           {availableTags
-            .filter((tag) =>
-              inputValue ? tag.name.toLowerCase().includes(inputValue.toLowerCase()) : true,
+            .filter((tag: TagOption) =>
+              inputValue
+                ? tag.name.toLowerCase().includes(inputValue.toLowerCase())
+                : true
             )
-            .map((tag) => (
+            .map((tag: TagOption) => (
               <button
                 key={tag.id}
                 type="button"
@@ -174,7 +181,9 @@ export const TagInput = ({
               </button>
             ))}
           {inputValue.trim() &&
-            !existingTags.some((t) => t.name.toLowerCase() === inputValue.trim().toLowerCase()) && (
+            !existingTags.some(
+              (t) => t.name.toLowerCase() === inputValue.trim().toLowerCase()
+            ) && (
               <button
                 type="button"
                 onMouseDown={(e) => {
