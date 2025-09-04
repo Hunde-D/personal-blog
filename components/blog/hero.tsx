@@ -1,6 +1,6 @@
+import { Twitter } from "lucide-react";
 import Link from "next/link";
 import { MarkdownRenderer } from "./markdown-renderer";
-import { Twitter } from "lucide-react";
 
 const content = `
 # Hi, I'm Hunde 👋

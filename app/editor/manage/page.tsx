@@ -1,6 +1,8 @@
-import { ManagePost } from "@/components/blog/manage-post";
-import { api, HydrateClient } from "@/trpc/server";
 import { Suspense } from "react";
+import { ManagePost, ManagePostHeader } from "@/components/blog/manage-post";
+import { ClassicLoader } from "@/components/ui/classic-loader";
+import { api, HydrateClient } from "@/trpc/server";
+
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 export const metadata = {
@@ -9,16 +11,20 @@ export const metadata = {
 };
 const ManagePostsPage = async (props: { searchParams: SearchParams }) => {
   const searchParams = await props.searchParams;
-  void api.post.listAll.prefetchInfinite({
+  // Prefetch the first page of all posts for management
+  await api.post.list.prefetchInfinite({
     limit: 10,
     query: searchParams.query as string | undefined,
   });
 
   return (
     <HydrateClient>
-      <Suspense>
-        <ManagePost />
-      </Suspense>
+      <div>
+        <ManagePostHeader />
+        <Suspense fallback={<ClassicLoader />}>
+          <ManagePost />
+        </Suspense>
+      </div>
     </HydrateClient>
   );
 };

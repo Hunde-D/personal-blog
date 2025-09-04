@@ -1,9 +1,10 @@
-import { Navigation } from "@/components/layout/navigation";
+import type { Metadata } from "next";
 import { Footer } from "@/components/layout/footer";
+import { Navigation } from "@/components/layout/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Newsletter - Hunde's Blog",
   description:
     "Subscribe to get the latest posts and coding insights delivered to your inbox",

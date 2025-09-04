@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { TRPCReactProvider } from "@/trpc/react";
-import { Navigation } from "@/components/layout/navigation";
+import { Toaster } from "sonner";
 import { Footer } from "@/components/layout/footer";
+import { Navigation } from "@/components/layout/navigation";
 import { ThemeProvider } from "@/provider/theme-provider";
+import { TRPCReactProvider } from "@/trpc/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TRPCReactProvider>
+            <Toaster position="top-right" />
             <div className="relative flex flex-col min-h-screen bg-background max-w-4xl overflow-x-hidden mx-auto">
               <header className="mt-5">
                 <Navigation />

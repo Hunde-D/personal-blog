@@ -1,5 +1,5 @@
-import z from "zod";
-import { PostCreateSchema, PostMutateSchema } from "./validation";
+import type z from "zod";
+import type { PostCreateSchema, PostMutateSchema } from "./validation";
 
 export type PostT = {
   id: string;
@@ -14,6 +14,10 @@ export type PostT = {
   published: boolean;
   publishedAt: Date | null;
   authorId: string;
+  tags?: Array<{
+    id: string;
+    name: string;
+  }>;
 };
 
 export type PostCT = z.infer<typeof PostCreateSchema>;

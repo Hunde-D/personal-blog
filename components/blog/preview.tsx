@@ -1,14 +1,17 @@
 import React from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { BlogPost } from "@/components/blog/blog-post";
-import { PostCT } from "./types";
-
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BlogStatusBadge } from "./blog-status-badge";
+import type { PostCT } from "./types";
 export function Preview({ post }: { post: PostCT }) {
   return (
     <Card>
       <CardHeader>
-        <Badge>Preview</Badge>
+        <CardTitle className="flex gap-2">
+          <Badge className="p-2 rounded-full">Preview</Badge>
+          <BlogStatusBadge published={post.published} />
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <BlogPost testPost={post} preview={true} />

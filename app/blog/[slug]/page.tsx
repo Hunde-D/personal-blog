@@ -1,15 +1,16 @@
-import { BlogPost } from "@/components/blog/blog-post";
+import { type Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
+import { BlogPost } from "@/components/blog/blog-post";
 import { api } from "@/trpc/server";
 
-interface BlogPostPageProps {
-  params: {
-    slug: string;
-  };
-}
+type Params = Promise<{ slug: string }>;
 
-export const generateMetadata = async ({ params }: BlogPostPageProps) => {
-  const post = await api.post.find({ slug: params.slug });
+export const generateMetadata = async (props: {
+  params: Params;
+}): Promise<Metadata> => {
+  const params = await props.params;
+  const slug = params.slug;
+  const post = await api.post.find({ slug });
 
   if (!post) {
     return {
@@ -23,8 +24,10 @@ export const generateMetadata = async ({ params }: BlogPostPageProps) => {
   };
 };
 
-const BlogPostPage = async ({ params }: BlogPostPageProps) => {
-  const post = await api.post.find({ slug: params.slug });
+const BlogPostPage = async (props: { params: Params }) => {
+  const params = await props.params;
+  const slug = params.slug;
+  const post = await api.post.find({ slug });
   if (!post) {
     notFound();
   }

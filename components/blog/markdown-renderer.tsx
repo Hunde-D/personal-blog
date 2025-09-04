@@ -1,10 +1,10 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import oneDark from "react-syntax-highlighter/dist/esm/styles/prism/one-dark";
 import oneLight from "react-syntax-highlighter/dist/esm/styles/prism/one-light";
+import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 
 interface MarkdownRendererProps {
@@ -16,6 +16,8 @@ export function MarkdownRenderer({
   content,
   className,
 }: MarkdownRendererProps) {
+  // Normalize headings without a space after '#', e.g., "#Title" -> "# Title"
+  const normalizedContent = (content || "").replace(/^(#{1,6})([^ #\n])/gm, "$1 $2");
   return (
     <div className={cn("prose prose-lg max-w-full text-pretty", className)}>
       <ReactMarkdown
@@ -172,7 +174,7 @@ export function MarkdownRenderer({
           ),
         }}
       >
-        {content}
+        {normalizedContent}
       </ReactMarkdown>
     </div>
   );

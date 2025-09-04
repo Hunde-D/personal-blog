@@ -4,8 +4,8 @@ export function Footer() {
       <div className=" w-full mx-auto px-6 py-5 flex flex-col items-center gap-4 text-center">
         <p className="text-muted-foreground text-sm sm:text-base">
           ✨ Built with <span className="font-medium">curiosity</span>,{" "}
-          <span className="font-medium">consistency</span>, and a whole lot of{" "}
-          ❤️ + ☕
+          <span className="font-medium">consistency</span>, and a whole lot of ❤️
+          + ☕
         </p>
 
         <p className="text-xs text-muted-foreground">

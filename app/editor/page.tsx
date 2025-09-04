@@ -1,79 +1,54 @@
-"use client";
-import { useState, useEffect, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { EditorClient } from "@/components/blog/editor-client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Eye, Save, ArrowLeft } from "lucide-react";
-import { Preview } from "@/components/blog/preview";
-import { api } from "@/trpc/react";
-import { PostCT } from "@/components/blog/types";
+import { ClassicLoader } from "@/components/ui/classic-loader";
+import { auth } from "@/lib/auth";
+import { api } from "@/trpc/server";
 
-export default function EditorPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [postData, setPostData] = useState<PostCT>({
-    title: "Untitled Post",
-    content: "",
-    excerpt: "",
-  });
-  const [isPreview, setIsPreview] = useState<boolean>(false);
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
-  const slug = searchParams.get("edit");
-  const { data: foundPost, isLoading } = api.post.find.useQuery(
-    { slug: slug! },
-    {
-      enabled: !!slug,
+export const generateMetadata = async (props: {
+  searchParams: SearchParams;
+}): Promise<Metadata> => {
+  const searchParams = await props.searchParams;
+  const slug = searchParams.edit as string | undefined;
+  if (slug) {
+    const post = await api.post.find({ slug });
+    if (!post) {
+      return {
+        title: "Post Not Found",
+      };
     }
-  );
+    return {
+      title: post.title,
+      description: post.excerpt,
+    };
+  }
+  return {
+    title: "Create New Post - Hunde's Blog",
+    description: "Create and edit your blog posts",
+  };
+};
 
-  useEffect(() => {
-    if (foundPost) {
-      setPostData({
-        title: foundPost.title,
-        content: foundPost.content,
-        excerpt: foundPost.excerpt ?? "",
-      });
-    }
-  }, [foundPost]);
-
-  const createPost = api.post.admin.create.useMutation({
-    onSuccess: (post) => {
-      utils.post.invalidate();
-      router.push(`/blog/${post.slug}`);
-    },
-    onError: (error) => {
-      console.error("Error creating post:", error);
-      alert("Failed to create post");
-    },
-  });
-  const utils = api.useUtils();
-
-  const mutatePost = api.post.admin.mutate.useMutation({
-    onSuccess: (post) => {
-      utils.post.find.invalidate({ slug: post.slug });
-      router.push(`/blog/${post.slug}`);
-    },
-    onError: (error) => {
-      console.error("Error updating post:", error);
-      alert("Failed to update post");
-    },
+const EditorPage = async (props: { searchParams: SearchParams }) => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
   });
 
-  const handleSubmit = useCallback(() => {
-    createPost.mutate(postData);
-  }, [createPost, postData]);
+  if (!session) {
+    redirect("/auth/sign-in");
+  }
+  const searchParams = await props.searchParams;
+  const slug = (searchParams.edit as string) ?? null;
 
-  const handleUpdate = useCallback(() => {
-    if (!foundPost?.id) {
-      alert("Post not found for updating.");
-      return;
-    }
-    mutatePost.mutate({ id: foundPost.id, ...postData });
-  }, [mutatePost, postData, foundPost]);
-
-  if (isLoading) {
-    return <div>Loading post data...</div>;
+  let foundPost = null;
+  if (slug) {
+    foundPost = await api.post.find({ slug });
   }
 
   return (
@@ -88,104 +63,20 @@ export default function EditorPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button
-            variant="outline"
-            onClick={() => router.push("/editor/manage")}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Manage Posts
-          </Button>
+          <Link href="/editor/manage">
+            <Button variant="outline">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Manage Posts
+            </Button>
+          </Link>
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
-        <div className="space-y-6">
-          <div className="space-y-4 p-5">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium mb-2">
-                Title
-              </label>
-              <Input
-                id="title"
-                value={postData.title}
-                onChange={(e) =>
-                  setPostData({ ...postData, title: e.target.value })
-                }
-                placeholder="Enter your blog post title..."
-                className=""
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="excerpt"
-                className="block text-sm font-medium mb-2"
-              >
-                Excerpt
-              </label>
-              <Textarea
-                id="excerpt"
-                value={postData.excerpt}
-                onChange={(e) =>
-                  setPostData({ ...postData, excerpt: e.target.value })
-                }
-                placeholder="Write a brief excerpt or summary..."
-                rows={3}
-                className=" resize-none"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="content"
-                className="block text-sm font-medium mb-2"
-              >
-                Content
-                <span className="text-muted-foreground/80 text-xs ml-2">
-                  ( Supports markdown: ## headings, **bold**, &gt; quotes, •
-                  bullets )
-                </span>
-              </label>
-              <Textarea
-                id="content"
-                value={postData.content}
-                onChange={(e) =>
-                  setPostData({ ...postData, content: e.target.value })
-                }
-                placeholder="Write your blog post content here..."
-                rows={20}
-                className=" resize-none font-mono text-sm"
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button
-                onClick={slug ? handleUpdate : handleSubmit}
-                className="flex items-center gap-2"
-                disabled={slug ? mutatePost.isPending : createPost.isPending}
-              >
-                <Save className="w-4 h-4" />
-                {slug
-                  ? mutatePost.isPending
-                    ? "Updating..."
-                    : "Update Post"
-                  : createPost.isPending
-                  ? "Saving..."
-                  : "Save Post"}
-              </Button>
-              <Button
-                onClick={() => setIsPreview(!isPreview)}
-                className="flex items-center gap-2 bg-secondary text-secondary-foreground"
-              >
-                <Eye className="w-4 h-4" />
-                {isPreview ? "Hide Preview" : "Show Preview"}
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="">{isPreview && <Preview post={postData} />}</div>
-      </div>
+      <Suspense fallback={<ClassicLoader />}>
+        <EditorClient />
+      </Suspense>
     </>
   );
-}
+};
+
+export default EditorPage;

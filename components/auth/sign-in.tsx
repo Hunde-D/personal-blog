@@ -1,7 +1,6 @@
 "use client";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -10,39 +9,73 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import { InputField, CheckboxField } from "@/components/ui/form-field";
+import { SignInSchema, type SignInInput } from "@/lib/auth-validation";
+import { formatValidationErrors } from "@/lib/form-utils";
+import { LoadingSpinner } from "@/components/ui/loading-states";
 
 export default function SigninModal() {
   const id = useId();
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState<SignInInput>({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (field: keyof SignInInput, value: string | boolean) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    try {
+      SignInSchema.parse(form);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof Error) {
+        const validationErrors = formatValidationErrors(error as any);
+        setErrors(validationErrors);
+      }
+      return false;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-    setError(null);
+    setErrors({});
     setSuccess(false);
+
     try {
       const { data, error } = await authClient.signIn.email({
         email: form.email,
         password: form.password,
       });
+
       if (error) {
-        setError(error.message || "Sign in failed");
+        setErrors({ form: error.message || "Sign in failed" });
       } else {
         setSuccess(true);
+        // Close modal or redirect after successful sign in
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
       }
     } catch (err: any) {
-      setError(err.message || "Sign in failed");
+      setErrors({ form: err.message || "Sign in failed" });
     } finally {
       setLoading(false);
     }
@@ -71,54 +104,64 @@ export default function SigninModal() {
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div className="*:not-first:mt-2">
-              <Label htmlFor={`${id}-email`}>Email</Label>
-              <Input
-                id={`${id}-email`}
-                name="email"
-                placeholder="subha9.5roy350@gmail.com"
-                type="email"
-                required
-                value={form.email}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-            <div className="*:not-first:mt-2">
-              <Label htmlFor={`${id}-password`}>Password</Label>
-              <Input
-                id={`${id}-password`}
-                name="password"
-                placeholder="Enter your password"
-                type="password"
-                required
-                value={form.password}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
+            <InputField
+              id={`${id}-email`}
+              label="Email"
+              type="email"
+              placeholder="Enter your email address"
+              value={form.email}
+              onChange={(value) => handleChange("email", value)}
+              error={errors.email}
+              required
+              disabled={loading}
+              autoComplete="email"
+            />
+            <InputField
+              id={`${id}-password`}
+              label="Password"
+              type="password"
+              placeholder="Enter your password"
+              value={form.password}
+              onChange={(value) => handleChange("password", value)}
+              error={errors.password}
+              required
+              disabled={loading}
+              autoComplete="current-password"
+            />
           </div>
+
           <div className="flex justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <Checkbox id={`${id}-remember`} />
-              <Label
-                htmlFor={`${id}-remember`}
-                className="text-muted-foreground font-normal"
-              >
-                Remember me
-              </Label>
-            </div>
+            <CheckboxField
+              id={`${id}-remember`}
+              label="Remember me"
+              checked={form.rememberMe}
+              onChange={(checked) => handleChange("rememberMe", checked)}
+            />
             <a className="text-sm underline hover:no-underline" href="#">
               Forgot password?
             </a>
           </div>
+
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? (
+              <>
+                <LoadingSpinner size="sm" className="mr-2" />
+                Signing in...
+              </>
+            ) : (
+              "Sign in"
+            )}
           </Button>
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          {errors.form && (
+            <p className="text-destructive text-sm text-center">
+              {errors.form}
+            </p>
+          )}
+
           {success && (
             <p className="text-green-600 text-sm text-center">
-              Sign in successful!
+              Sign in successful! Redirecting...
             </p>
           )}
         </form>

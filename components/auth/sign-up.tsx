@@ -1,4 +1,5 @@
 "use client";
+
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,51 +10,116 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
+import {
+  InputField,
+  CheckboxField,
+  FormFieldGroup,
+} from "@/components/ui/form-field";
+import { SignUpSchema, type SignUpInput } from "@/lib/auth-validation";
+import { formatValidationErrors } from "@/lib/form-utils";
+import { LoadingSpinner } from "@/components/ui/loading-states";
+import { validatePassword } from "@/lib/auth-validation";
 
-export default function SignupModal() {
+export default function SignUpModal() {
   const id = useId();
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState<SignUpInput>({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [success, setSuccess] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState<{
+    isValid: boolean;
+    errors: string[];
+  }>({ isValid: false, errors: [] });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (field: keyof SignUpInput, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+
+    // Validate password strength in real-time
+    if (field === "password") {
+      const strength = validatePassword(value);
+      setPasswordStrength(strength);
+    }
+  };
+
+  const validateForm = (): boolean => {
+    try {
+      SignUpSchema.parse(form);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof Error) {
+        const validationErrors = formatValidationErrors(error as any);
+        setErrors(validationErrors);
+      }
+      return false;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-    setError(null);
+    setErrors({});
     setSuccess(false);
+
     try {
       const { data, error } = await authClient.signUp.email({
-        name: form.name,
         email: form.email,
         password: form.password,
+        name: form.name,
       });
+
       if (error) {
-        setError(error.message || "Signup failed");
+        setErrors({ form: error.message || "Sign up failed" });
       } else {
         setSuccess(true);
+        // Close modal or redirect after successful sign up
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       }
     } catch (err: any) {
-      setError(err.message || "Signup failed");
+      setErrors({ form: err.message || "Sign up failed" });
     } finally {
       setLoading(false);
     }
   };
 
+  const getPasswordStrengthColor = () => {
+    if (form.password.length === 0) return "text-muted-foreground";
+    if (passwordStrength.isValid) return "text-green-600";
+    if (form.password.length >= 8) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  const getPasswordStrengthText = () => {
+    if (form.password.length === 0) return "Enter a password";
+    if (passwordStrength.isValid) return "Strong password";
+    if (form.password.length >= 8) return "Moderate password";
+    return "Weak password";
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">Sign up</Button>
+        <Button variant="outline">Sign up</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <div className="flex flex-col items-center gap-2">
           <div
             className="flex size-11 shrink-0 items-center justify-center rounded-full border"
@@ -63,63 +129,107 @@ export default function SignupModal() {
           </div>
           <DialogHeader>
             <DialogTitle className="sm:text-center">
-              Sign up to Personal Blog
+              Create an account
             </DialogTitle>
             <DialogDescription className="sm:text-center">
-              We just need a few details to get you started.
+              Enter your details to create your account.
             </DialogDescription>
           </DialogHeader>
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div className="*:not-first:mt-2">
-              <Label htmlFor={`${id}-name`}>Full name</Label>
-              <Input
-                id={`${id}-name`}
-                name="name"
-                placeholder="Subhadeep Roy"
-                type="text"
-                required
-                value={form.name}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-            <div className="*:not-first:mt-2">
-              <Label htmlFor={`${id}-email`}>Email</Label>
-              <Input
-                id={`${id}-email`}
-                name="email"
-                placeholder="subha9.5roy350@gmail.com"
-                type="email"
-                required
-                value={form.email}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-            <div className="*:not-first:mt-2">
-              <Label htmlFor={`${id}-password`}>Password</Label>
-              <Input
-                id={`${id}-password`}
-                name="password"
-                placeholder="Enter your password"
-                type="password"
-                required
-                value={form.password}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-          </div>
+          <FormFieldGroup>
+            <InputField
+              id={`${id}-name`}
+              label="Full Name"
+              placeholder="Enter your full name"
+              value={form.name}
+              onChange={(value) => handleChange("name", value)}
+              error={errors.name}
+              required
+              disabled={loading}
+              autoComplete="name"
+            />
+
+            <InputField
+              id={`${id}-email`}
+              label="Email"
+              type="email"
+              placeholder="Enter your email address"
+              value={form.email}
+              onChange={(value) => handleChange("email", value)}
+              error={errors.email}
+              required
+              disabled={loading}
+              autoComplete="email"
+            />
+
+            <InputField
+              id={`${id}-password`}
+              label="Password"
+              type="password"
+              placeholder="Create a strong password"
+              value={form.password}
+              onChange={(value) => handleChange("password", value)}
+              error={errors.password}
+              required
+              disabled={loading}
+              autoComplete="new-password"
+            />
+
+            {form.password && (
+              <div className="space-y-2">
+                <p className={`text-sm ${getPasswordStrengthColor()}`}>
+                  {getPasswordStrengthText()}
+                </p>
+                {!passwordStrength.isValid &&
+                  passwordStrength.errors.length > 0 && (
+                    <ul className="text-xs text-muted-foreground space-y-1">
+                      {passwordStrength.errors.map((error, index) => (
+                        <li key={index} className="flex items-center gap-1">
+                          <span className="text-destructive">•</span>
+                          {error}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+              </div>
+            )}
+
+            <InputField
+              id={`${id}-confirmPassword`}
+              label="Confirm Password"
+              type="password"
+              placeholder="Confirm your password"
+              value={form.confirmPassword}
+              onChange={(value) => handleChange("confirmPassword", value)}
+              error={errors.confirmPassword}
+              required
+              disabled={loading}
+              autoComplete="new-password"
+            />
+          </FormFieldGroup>
+
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing up..." : "Sign up"}
+            {loading ? (
+              <>
+                <LoadingSpinner size="sm" className="mr-2" />
+                Creating account...
+              </>
+            ) : (
+              "Create account"
+            )}
           </Button>
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          {errors.form && (
+            <p className="text-destructive text-sm text-center">
+              {errors.form}
+            </p>
+          )}
+
           {success && (
             <p className="text-green-600 text-sm text-center">
-              Signup successful! Check your email.
+              Account created successfully! Redirecting...
             </p>
           )}
         </form>
@@ -128,16 +238,22 @@ export default function SignupModal() {
           <span className="text-muted-foreground text-xs">Or</span>
         </div>
 
-        <Button variant="outline" disabled={loading}>
-          Continue with Google
+        <Button variant="outline" disabled={loading} className="w-full">
+          Sign up with Google
         </Button>
 
-        <p className="text-muted-foreground text-center text-xs">
-          By signing up you agree to our{" "}
-          <a className="underline hover:no-underline" href="#">
-            Terms
-          </a>
-          .
+        <p className="text-sm text-muted-foreground text-center">
+          Already have an account?{" "}
+          <button
+            type="button"
+            className="text-primary hover:underline"
+            onClick={() => {
+              // Close this modal and open sign in modal
+              // This would need to be handled by parent component
+            }}
+          >
+            Sign in
+          </button>
         </p>
       </DialogContent>
     </Dialog>

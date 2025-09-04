@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { MarkdownRenderer } from "./markdown-renderer";
-import { PostT, PostCT } from "./types";
+import type { PostCT, PostT } from "./types";
 
 interface BlogPostProps {
   post?: PostT;
@@ -11,7 +11,21 @@ interface BlogPostProps {
 
 export function BlogPost({ post, preview = false, testPost }: BlogPostProps) {
   if (preview && testPost) {
-    post = testPost as PostT;
+    post = {
+      id: "preview",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      slug: "preview",
+      authorId: "preview",
+      publishedAt: new Date(),
+      readTimeMin: null,
+      title: testPost.title,
+      content: testPost.content,
+      excerpt: testPost.excerpt,
+      published: testPost.published,
+      coverImage: testPost.coverImage,
+      tags: testPost.tags,
+    } as PostT;
   }
   return (
     <article className="">
@@ -20,12 +34,7 @@ export function BlogPost({ post, preview = false, testPost }: BlogPostProps) {
           {post?.title}
         </h1>
         <time className="text-muted-foreground italic text-sm sm:text-base">
-          Published{" "}
-          {new Date().toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+          Published {post?.publishedAt?.toDateString()}
         </time>
       </div>
       <MarkdownRenderer content={post?.content ?? ""} />
