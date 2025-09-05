@@ -15,20 +15,22 @@ export const EditorClient = ({
   edit = false,
 }: EditorClientProps) => {
   const [postData, setPostData] = useState<PostCT>(
-    foundPost ? {
-      title: foundPost.title,
-      content: foundPost.content,
-      excerpt: foundPost.excerpt || "",
-      published: foundPost.published,
-      coverImage: foundPost.coverImage,
-      tags: foundPost.tags || [],
-    } : {
-      title: "Untitled Post",
-      content: "",
-      excerpt: "",
-      published: false,
-      tags: [],
-    },
+    foundPost
+      ? {
+          title: foundPost.title,
+          content: foundPost.content,
+          excerpt: foundPost.excerpt || "",
+          published: foundPost.published,
+          coverImage: foundPost.coverImage,
+          tags: foundPost.tags || [],
+        }
+      : {
+          title: "Untitled Post",
+          content: "",
+          excerpt: "",
+          published: false,
+          tags: [],
+        }
   );
   const [isPreview, setIsPreview] = useState<boolean>(false);
   const { createPost, mutatePost } = useEditorActions();

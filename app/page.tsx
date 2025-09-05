@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Hero } from "@/components/blog/hero";
-import { LatestArticles } from "@/components/blog/latest-articles";
+import { LatestBlogs } from "@/components/blog/latest-blogs";
 import { ClassicLoader } from "@/components/ui/classic-loader";
 import { api, HydrateClient } from "@/trpc/server";
 
@@ -20,7 +20,7 @@ export default function HomePage() {
         <Hero />
         <section>
           <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-            <h2 className="text-2xl sm:text-3xl font-bold">Latest Articles</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold">Latest Blogs</h2>
             <div className="h-1 w-8 sm:w-12 bg-primary"></div>
           </div>
           <Suspense
@@ -30,7 +30,7 @@ export default function HomePage() {
               </div>
             }
           >
-            <LatestArticles />
+            <LatestBlogs />
           </Suspense>
         </section>
       </div>

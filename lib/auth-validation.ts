@@ -13,7 +13,6 @@ export const SignInSchema = z.object({
     .min(1, "Password is required")
     .min(8, "Password must be at least 8 characters")
     .max(128, "Password must be less than 128 characters"),
-  rememberMe: z.boolean().default(false),
 });
 
 // Sign up validation schema

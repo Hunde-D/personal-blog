@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Edit,
-  Globe,
-  LogOut,
-  MoreVertical,
-  Plus,
-  Trash2,
-  Tag,
-} from "lucide-react";
+import { Edit, Globe, MoreVertical, Plus, Trash2, Tag } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,6 +20,7 @@ import { useEditorActions } from "@/hooks/use-editor-actions";
 import { useAllPosts } from "@/hooks/use-posts";
 import { BlogStatusBadge } from "./blog-status-badge";
 import { FilterBar } from "./filter-bar";
+
 export const ManagePost = () => {
   const router = useRouter();
   const pathname = usePathname();

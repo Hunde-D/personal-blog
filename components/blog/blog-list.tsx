@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tag } from "lucide-react";
 import { usePublishedPosts } from "@/hooks/use-posts";
-import { PostListSkeleton } from "@/components/ui/loading-states";
 import { Input } from "@/components/ui/input";
 
 export const BlogList = () => {
@@ -17,14 +16,9 @@ export const BlogList = () => {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-    isLoading,
     isError,
     error,
   } = usePublishedPosts(10, searchTerm);
-
-  if (isLoading) {
-    return <PostListSkeleton count={3} />;
-  }
 
   if (isError) {
     return (

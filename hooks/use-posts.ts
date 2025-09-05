@@ -3,39 +3,19 @@
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { api } from "@/trpc/react";
+import { PostT } from "@/components/blog/types";
 
 export type UsePostsOptions = {
   limit?: number;
   publishedOnly?: boolean;
   suspense?: boolean;
   query?: string;
-  tags?: Array<{ id?: string; name: string }>; // accepted but currently unused in this hook
+  tags?: Array<{ id?: string; name: string }>;
   status?: "all" | "published" | "draft";
 };
 
 export type UsePostsReturn = {
-  posts: Array<{
-    id: string;
-    title: string;
-    excerpt: string | null;
-    slug: string;
-    coverImage: string | null;
-    readTimeMin: number | null;
-    published: boolean;
-    publishedAt: Date | null;
-    createdAt: Date;
-    updatedAt: Date;
-    authorId: string;
-    author: {
-      id: string;
-      name: string;
-      image: string | null;
-    };
-    tags: Array<{
-      id: string;
-      name: string;
-    }>;
-  }>;
+  posts: PostT[];
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
@@ -46,7 +26,14 @@ export type UsePostsReturn = {
 };
 
 export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
-  const { limit = 10, publishedOnly = false, suspense = true, query: queryOption, tags, status } = options;
+  const {
+    limit = 10,
+    publishedOnly = false,
+    suspense = true,
+    query: queryOption,
+    tags,
+    status,
+  } = options;
   const searchParams = useSearchParams();
 
   const queryParam = useMemo(() => {
@@ -75,7 +62,7 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
           getNextPageParam: (lastPage) => lastPage.nextCursor,
           staleTime: 5 * 60 * 1000,
           gcTime: 10 * 60 * 1000,
-        },
+        }
       )
     : (tags && tags.length > 0) || (status && status !== "all")
     ? api.post.listWithFilters.useInfiniteQuery(
@@ -88,7 +75,7 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
           getNextPageParam: (lastPage) => lastPage.nextCursor,
           staleTime: 5 * 60 * 1000,
           gcTime: 10 * 60 * 1000,
-        },
+        }
       )
     : api.post.list.useInfiniteQuery(
         { limit: queryKey.limit, query: queryKey.query },
@@ -96,15 +83,20 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
           getNextPageParam: (lastPage) => lastPage.nextCursor,
           staleTime: 5 * 60 * 1000,
           gcTime: 10 * 60 * 1000,
-        },
+        }
       );
 
   // Transform the data to match our expected type
-  const transformPosts = (posts: any[]) => posts.map(post => ({
-    ...post,
-    tags: post.tags || [],
-    author: post.author || { id: post.authorId, name: 'Unknown', image: null }
-  }));
+  const transformPosts = (posts: any[]) =>
+    posts.map((post) => ({
+      ...post,
+      tags: post.tags || [],
+      author: post.author || {
+        id: post.authorId,
+        name: "Unknown",
+        image: null,
+      },
+    }));
 
   const {
     data,
@@ -139,14 +131,12 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
 export const usePublishedPosts = (
   limit?: number,
   query?: string,
-  tags?: Array<{ id?: string; name: string }>,
-) =>
-  usePosts({ limit, publishedOnly: true, query, tags, status: "published" });
+  tags?: Array<{ id?: string; name: string }>
+) => usePosts({ limit, publishedOnly: true, query, tags, status: "published" });
 
 export const useAllPosts = (
   limit?: number,
   query?: string,
   tags?: Array<{ id?: string; name: string }>,
-  status?: "all" | "published" | "draft",
-) =>
-  usePosts({ limit, publishedOnly: false, query, tags, status });
+  status?: "all" | "published" | "draft"
+) => usePosts({ limit, publishedOnly: false, query, tags, status });

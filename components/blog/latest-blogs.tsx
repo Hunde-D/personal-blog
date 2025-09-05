@@ -1,9 +1,8 @@
 "use client";
 import Link from "next/link";
 import { usePublishedPosts } from "@/hooks/use-posts";
-import { ClassicLoader } from "../ui/classic-loader";
 
-export function LatestArticles() {
+export function LatestBlogs() {
   const { posts: publishedPosts } = usePublishedPosts();
   return (
     <>

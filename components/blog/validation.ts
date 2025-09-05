@@ -9,20 +9,21 @@ export const PostCreateSchema = z.object({
   content: z
     .string()
     .min(10, "Content must be at least 10 characters")
-    .max(5000, "Content must be less than 5000 characters")
-    .trim(),
+    .max(5000, "Content must be less than 5000 characters"),
   excerpt: z
     .string()
     .min(2, "Excerpt must be at least 2 characters")
-    .max(200, "Excerpt must be less than 200 characters")
-    .trim(),
+    .max(200, "Excerpt must be less than 200 characters"),
   published: z.boolean().default(false),
   coverImage: z.string().url("Invalid URL format").nullable().optional(),
   slug: z
     .string()
     .min(1, "Slug must be at least 1 character")
     .max(120, "Slug must be less than 120 characters")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug can contain lowercase letters, numbers and dashes only")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug can contain lowercase letters, numbers and dashes only"
+    )
     .optional(),
   tags: z
     .array(
@@ -46,13 +47,11 @@ export const PostMutateSchema = z.object({
     .string()
     .min(2, "Excerpt must be at least 2 characters")
     .max(200, "Excerpt must be less than 200 characters")
-    .trim()
     .optional(),
   content: z
     .string()
     .min(10, "Content must be at least 10 characters")
     .max(5000, "Content must be less than 5000 characters")
-    .trim()
     .optional(),
   published: z.boolean().optional(),
   readTimeMin: z
@@ -64,7 +63,10 @@ export const PostMutateSchema = z.object({
     .string()
     .min(1, "Slug must be at least 1 character")
     .max(120, "Slug must be less than 120 characters")
-    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Slug can contain lowercase letters, numbers and dashes only")
+    .regex(
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+      "Slug can contain lowercase letters, numbers and dashes only"
+    )
     .optional(),
   tags: z
     .array(

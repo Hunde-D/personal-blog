@@ -12,7 +12,7 @@ export const metadata = {
 const ManagePostsPage = async (props: { searchParams: SearchParams }) => {
   const searchParams = await props.searchParams;
   // Prefetch the first page of all posts for management
-  await api.post.list.prefetchInfinite({
+  void api.post.list.prefetchInfinite({
     limit: 10,
     query: searchParams.query as string | undefined,
   });

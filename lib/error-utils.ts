@@ -45,11 +45,78 @@ export const isTRPCClientError = (
  * @returns Formatted error message
  */
 export const formatError = (error: unknown): string => {
+  // Helper to extract messages if error.message contains a JSON array of issues
+  const parseArrayMessage = (msg: unknown): string | null => {
+    if (typeof msg !== "string") return null;
+    const trimmed = msg.trim();
+    if (!trimmed.startsWith("[")) return null;
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        const messages: string[] = [];
+        for (const item of parsed) {
+          if (Array.isArray(item)) {
+            for (const sub of item) {
+              if (sub && typeof sub.message === "string")
+                messages.push(sub.message);
+            }
+          } else if (item && typeof item.message === "string") {
+            messages.push(item.message);
+          }
+        }
+        if (messages.length > 0) {
+          return messages.join("; ");
+        }
+      }
+    } catch {
+      // fall through to default handling
+    }
+    return null;
+  };
+
   if (isTRPCClientError(error)) {
+    // If server included a JSON-array string of issues in message, parse it
+    const parsed = parseArrayMessage((error as any)?.message);
+    if (parsed) return parsed;
+
+    // Attempt to extract zodError structure if provided
+    const anyErr: any = error as any;
+    const zodError = anyErr?.data?.zodError;
+    if (zodError) {
+      const fieldErrors: Record<string, string[]> | undefined =
+        zodError.fieldErrors;
+      const formErrors: string[] | undefined = zodError.formErrors;
+      const messages: string[] = [];
+      if (fieldErrors) {
+        for (const key of Object.keys(fieldErrors)) {
+          const list = fieldErrors[key];
+          if (Array.isArray(list)) {
+            for (const msg of list) {
+              if (typeof msg === "string" && msg.trim().length > 0) {
+                messages.push(msg);
+              }
+            }
+          }
+        }
+      }
+      if (Array.isArray(formErrors)) {
+        for (const msg of formErrors) {
+          if (typeof msg === "string" && msg.trim().length > 0) {
+            messages.push(msg);
+          }
+        }
+      }
+      if (messages.length > 0) {
+        return messages.join("; ");
+      }
+    }
+
     return getErrorMessage(error);
   }
 
   if (error instanceof Error) {
+    const parsed = parseArrayMessage(error.message);
+    if (parsed) return parsed;
     return error.message;
   }
 

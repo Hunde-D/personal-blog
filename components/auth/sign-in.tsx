@@ -1,5 +1,7 @@
 "use client";
 import { useId, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,17 +12,24 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { authClient } from "@/lib/auth-client";
-import { InputField, CheckboxField } from "@/components/ui/form-field";
+import { InputField } from "@/components/ui/form-field";
 import { SignInSchema, type SignInInput } from "@/lib/auth-validation";
 import { formatValidationErrors } from "@/lib/form-utils";
 import { LoadingSpinner } from "@/components/ui/loading-states";
+import { BookMarked } from "lucide-react";
 
-export default function SigninModal() {
+export default function SigninModal({
+  children,
+  callback,
+}: {
+  children: React.ReactNode;
+  callback?: () => void;
+}) {
   const id = useId();
+  const router = useRouter();
   const [form, setForm] = useState<SignInInput>({
     email: "",
     password: "",
-    rememberMe: false,
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -66,16 +75,19 @@ export default function SigninModal() {
       });
 
       if (error) {
-        setErrors({ form: error.message || "Sign in failed" });
+        const message = error.message || "Sign in failed";
+        setErrors({ form: message });
+        toast.error(message);
       } else {
         setSuccess(true);
-        // Close modal or redirect after successful sign in
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        callback?.();
+        toast.success("Signed in successfully");
+        router.push("/");
       }
     } catch (err: any) {
-      setErrors({ form: err.message || "Sign in failed" });
+      const message = err.message || "Sign in failed";
+      setErrors({ form: message });
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -83,16 +95,14 @@ export default function SigninModal() {
 
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="secondary">Sign in</Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <div className="flex flex-col items-center gap-2">
           <div
             className="flex size-11 shrink-0 items-center justify-center rounded-full border"
             aria-hidden="true"
           >
-            <img src="/logo.webp" alt="logo" className="h-8 w-8 rounded-full" />
+            <BookMarked />
           </div>
           <DialogHeader>
             <DialogTitle className="sm:text-center">Welcome back</DialogTitle>
@@ -130,17 +140,7 @@ export default function SigninModal() {
             />
           </div>
 
-          <div className="flex justify-between gap-2">
-            <CheckboxField
-              id={`${id}-remember`}
-              label="Remember me"
-              checked={form.rememberMe}
-              onChange={(checked) => handleChange("rememberMe", checked)}
-            />
-            <a className="text-sm underline hover:no-underline" href="#">
-              Forgot password?
-            </a>
-          </div>
+          {/* Removed Remember me and Forgot password */}
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
@@ -158,21 +158,7 @@ export default function SigninModal() {
               {errors.form}
             </p>
           )}
-
-          {success && (
-            <p className="text-green-600 text-sm text-center">
-              Sign in successful! Redirecting...
-            </p>
-          )}
         </form>
-
-        <div className="before:bg-border after:bg-border flex items-center gap-3 before:h-px before:flex-1 after:h-px after:flex-1">
-          <span className="text-muted-foreground text-xs">Or</span>
-        </div>
-
-        <Button variant="outline" disabled={loading}>
-          Login with Google
-        </Button>
       </DialogContent>
     </Dialog>
   );

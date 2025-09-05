@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 
 const BlogPage = async () => {
   // Prefetch the first page of published posts
-  await api.post.listPublished.prefetchInfinite({
+  void api.post.listPublished.prefetchInfinite({
     limit: 10,
     query: undefined,
   });
@@ -21,7 +21,7 @@ const BlogPage = async () => {
     <HydrateClient>
       <div className="">
         <div className="flex items-center gap-4 mb-12">
-          <h1 className="text-3xl font-bold">Latest Articles</h1>
+          <h1 className="text-3xl font-bold">Latest Blogs</h1>
           <div className="h-1 w-12 bg-primary"></div>
         </div>
         <Suspense

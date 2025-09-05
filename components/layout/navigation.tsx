@@ -27,7 +27,6 @@ export function Navigation() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   // Fetch user session on mount and set up auth state listener
   const fetchUser = useCallback(async () => {
@@ -93,16 +92,12 @@ export function Navigation() {
     { href: "/newsletter", label: "Newsletter" },
   ];
 
-  const handleAuthClick = () => {
-    setIsAuthModalOpen(true);
-  };
-
   return (
-    <nav className="border rounded-md p-0.5">
+    <nav className="border rounded-md p-0.5 max-sm:mx-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Avatar
-            className="size-12 rounded-md ring-2 ring-border hover:ring-primary transition-all"
+            className="size-12 rounded-md ring-2 ring-border hover:ring-primary hover:cursor-pointer transition-all"
             onClick={() => setIsProfileDialogOpen(true)}
           >
             <AvatarImage src={user?.image} />
@@ -200,12 +195,13 @@ export function Navigation() {
                 pathname={pathname}
               />
             )}
+            <OwnerNav
+              closeMenu={() => setIsMenuOpen(false)}
+              pathname={pathname}
+            />
           </div>
         </div>
       )}
-
-      {/* Authentication Modal */}
-      {isAuthModalOpen && <SigninModal />}
 
       {/* User Profile Dialog */}
       <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
@@ -219,7 +215,7 @@ export function Navigation() {
           <div className="space-y-6">
             {/* Avatar and Basic Info */}
             <div className="flex flex-col items-center space-y-4">
-              <Avatar className="size-20 ring-4 ring-primary/20">
+              <Avatar className="size-20 ring-4 ring-primary/20 hover:cursor-pointer">
                 <AvatarImage src={user?.image} />
                 <AvatarFallback className="text-2xl font-bold text-primary">
                   {user?.name?.charAt(0) || "HD"}
@@ -328,16 +324,12 @@ export function Navigation() {
                     <h4 className="text-sm font-medium text-center text-muted-foreground">
                       Admin Access
                     </h4>
-                    <Button
-                      onClick={() => {
-                        setIsProfileDialogOpen(false);
-                        handleAuthClick();
-                      }}
-                      className="w-full"
-                    >
-                      <Shield className="mr-2 h-4 w-4" />
-                      Continue as Admin
-                    </Button>
+                    <SigninModal callback={() => setIsProfileDialogOpen(false)}>
+                      <Button className="w-full">
+                        <Shield className="mr-2 h-4 w-4" />
+                        Continue as Admin
+                      </Button>
+                    </SigninModal>
                   </div>
 
                   {/* External Links */}
@@ -404,7 +396,7 @@ const OwnerNav = ({
         fetchOptions: {
           onSuccess: () => {
             router.push("/");
-            router.refresh(); // Force refresh to update navigation
+            router.refresh();
           },
         },
       });
@@ -416,7 +408,7 @@ const OwnerNav = ({
   };
 
   return (
-    <div className="flex items-center gap-4">
+    <div className="flex items-center gap-4 max-sm:flex-col max-sm:items-start">
       <Separator orientation="vertical" />
       {editorItems.map((item) => {
         const Icon = item.icon;
@@ -450,4 +442,3 @@ const OwnerNav = ({
     </div>
   );
 };
-

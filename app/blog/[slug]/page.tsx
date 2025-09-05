@@ -1,4 +1,4 @@
-import { type Metadata, ResolvingMetadata } from "next";
+import { type Metadata } from "next";
 import { notFound } from "next/navigation";
 import { BlogPost } from "@/components/blog/blog-post";
 import { api } from "@/trpc/server";

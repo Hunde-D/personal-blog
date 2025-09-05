@@ -44,7 +44,7 @@ export default function RootLayout({
               <header className="mt-5">
                 <Navigation />
               </header>
-              <main className="border flex flex-col flex-1 mx-4 border-t-0 h-full">
+              <main className="sm:border flex flex-col flex-1 sm:mx-4 border-t-0 h-full">
                 <div className="mx-auto w-full px-4 sm:px-6 py-8 sm:py-16 flex-1 grid">
                   {children}
                 </div>

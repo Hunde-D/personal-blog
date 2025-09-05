@@ -15,8 +15,8 @@ export const processSearchQuery = (query: string): string => {
   // Remove special characters and normalize whitespace
   const sanitized = query
     .trim()
-    .replace(/[^\w\s]/g, " ") // Replace special chars with spaces
-    .replace(/\s+/g, " ") // Normalize multiple spaces to single space
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
     .toLowerCase();
 
   // Split into words and filter out empty strings
