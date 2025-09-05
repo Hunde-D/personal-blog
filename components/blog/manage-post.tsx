@@ -89,7 +89,6 @@ export const ManagePost = () => {
 
   return (
     <>
-      {/* Filter Bar */}
       <FilterBar
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -152,7 +151,6 @@ export const ManagePost = () => {
                     <p className="text-muted-foreground text-sm">
                       {post.excerpt}
                     </p>
-                    {/* Tags */}
                     {post.tags && post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {post.tags.map((tag) => (
@@ -180,7 +178,6 @@ export const ManagePost = () => {
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end" className="w-40">
-                      {/* Edit */}
                       <DropdownMenuItem asChild>
                         <Link
                           href={`/editor/${post.slug}`}
@@ -193,7 +190,6 @@ export const ManagePost = () => {
 
                       <DropdownMenuSeparator />
 
-                      {/* Delete */}
                       <DropdownMenuItem
                         onClick={() => deletePost.mutate({ id: post.id })}
                         disabled={deletePost.isPending}
@@ -203,7 +199,6 @@ export const ManagePost = () => {
                         Delete
                       </DropdownMenuItem>
 
-                      {/* Publish / Unpublish */}
                       <DropdownMenuItem
                         onClick={() =>
                           publishPost.mutate({

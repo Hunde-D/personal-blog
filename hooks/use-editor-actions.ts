@@ -11,7 +11,7 @@ export const useEditorActions = () => {
 
   const createPost = api.post.admin.create.useMutation({
     onSuccess: (post) => {
-      // Invalidate and refetch to ensure consistency
+      // Keep post lists fresh after creating
       utils.post.list.invalidate();
       utils.post.listPublished.invalidate();
 
@@ -19,9 +19,11 @@ export const useEditorActions = () => {
       router.push(`/blog/${post.slug}`);
     },
     onError: (error) => {
-      const message = formatError(error).includes("CONFLICT") || formatError(error).toLowerCase().includes("slug")
-        ? "Slug already in use. Please edit the slug."
-        : formatError(error);
+      const message =
+        formatError(error).includes("CONFLICT") ||
+        formatError(error).toLowerCase().includes("slug")
+          ? "Slug already in use. Please edit the slug."
+          : formatError(error);
       toast.error(message);
       logError(error, { action: "createPost" });
     },
@@ -29,7 +31,7 @@ export const useEditorActions = () => {
 
   const mutatePost = api.post.admin.mutate.useMutation({
     onSuccess: (post) => {
-      // Invalidate and refetch to ensure consistency
+      // Refresh lists and the updated post detail
       utils.post.list.invalidate();
       utils.post.listPublished.invalidate();
       utils.post.find.invalidate({ slug: post.slug });
@@ -38,16 +40,18 @@ export const useEditorActions = () => {
       router.push(`/blog/${post.slug}`);
     },
     onError: (error) => {
-      const message = formatError(error).includes("CONFLICT") || formatError(error).toLowerCase().includes("slug")
-        ? "Slug already in use. Please edit the slug."
-        : formatError(error);
+      const message =
+        formatError(error).includes("CONFLICT") ||
+        formatError(error).toLowerCase().includes("slug")
+          ? "Slug already in use. Please edit the slug."
+          : formatError(error);
       toast.error(message);
       logError(error, { action: "mutatePost" });
     },
   });
   const publishPost = api.post.admin.mutate.useMutation({
     onSuccess: (post) => {
-      // Invalidate and refetch to ensure consistency
+      // Refresh lists and the post detail after publishing
       utils.post.list.invalidate();
       utils.post.listPublished.invalidate();
       utils.post.find.invalidate({ slug: post.slug });
@@ -61,9 +65,9 @@ export const useEditorActions = () => {
     },
   });
   const deletePost = api.post.admin.delete.useMutation({
-    // Optimistic update: remove the post from cached lists immediately
+    // Optimistic: remove the post from cached lists immediately
     onMutate: async (input) => {
-      // Cancel outgoing queries to avoid race conditions
+      // Avoid races with in-flight queries
       await Promise.all([
         utils.post.list.cancel(),
         utils.post.listPublished.cancel(),
@@ -74,7 +78,7 @@ export const useEditorActions = () => {
       const prevList = utils.post.list.getInfiniteData(listInput);
       const prevPublished = utils.post.listPublished.getInfiniteData(listInput);
 
-      // Helper to remove the deleted id from pages
+      // Remove the deleted id from cached pages
       const removeFromPages = (data: typeof prevList) => {
         if (!data) return data;
         return {
@@ -95,14 +99,14 @@ export const useEditorActions = () => {
       return { prevList, prevPublished, listInput };
     },
     onSuccess: () => {
-      // Invalidate and refetch to ensure consistency
+      // Final refresh to align with server
       utils.post.list.invalidate();
       utils.post.listPublished.invalidate();
 
       toast.success("Post deleted successfully");
     },
     onError: (error, _input, context) => {
-      // Rollback to previous cache on error
+      // Roll back optimistic changes
       if (context?.prevList) {
         utils.post.list.setInfiniteData(context.listInput, context.prevList);
       }
@@ -118,7 +122,7 @@ export const useEditorActions = () => {
       logError(error, { action: "deletePost" });
     },
     onSettled: () => {
-      // Ensure cache is in sync with server
+      // Ensure cache is in sync with the server
       utils.post.list.invalidate();
       utils.post.listPublished.invalidate();
     },

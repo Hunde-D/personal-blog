@@ -28,10 +28,8 @@ export const TagFilter = ({
   const [searchTerm, setSearchTerm] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch available tags
   const { data: tags = [], isLoading } = api.post.getTags.useQuery();
 
-  // Filter tags based on search term
   const filteredTags: TagOption[] = (tags as TagOption[]).filter((tag) =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -42,7 +40,6 @@ export const TagFilter = ({
     } else {
       onTagsChange([...selectedTags, { id: tag.id, name: tag.name }]);
     }
-    // Close dropdown after selecting a tag
     setIsOpen(false);
   };
 
@@ -56,7 +53,6 @@ export const TagFilter = ({
 
   return (
     <div className={cn("relative", className)}>
-      {/* Selected Tags Display */}
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-3">
           {selectedTags.map((tag) => (
@@ -82,7 +78,6 @@ export const TagFilter = ({
         </div>
       )}
 
-      {/* Tag Filter Dropdown */}
       <div className="relative">
         <Button
           variant="outline"
@@ -109,7 +104,6 @@ export const TagFilter = ({
             className="absolute top-full left-0 right-0 mt-1 bg-background border border-border rounded-md shadow-lg z-50 max-h-64 overflow-hidden"
             onMouseLeave={() => setIsOpen(false)}
           >
-            {/* Search Input */}
             <div className="p-3 border-b border-border">
               <Input
                 placeholder="Search tags..."
@@ -119,7 +113,6 @@ export const TagFilter = ({
               />
             </div>
 
-            {/* Tags List */}
             <div className="max-h-48 overflow-y-auto">
               {isLoading ? (
                 <div className="p-3 text-center text-sm text-muted-foreground">
@@ -161,7 +154,6 @@ export const TagFilter = ({
         )}
       </div>
 
-      {/* Click outside to close */}
       {isOpen && (
         <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
       )}

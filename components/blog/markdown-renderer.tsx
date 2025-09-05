@@ -16,8 +16,11 @@ export function MarkdownRenderer({
   content,
   className,
 }: MarkdownRendererProps) {
-  // Normalize headings without a space after '#', e.g., "#Title" -> "# Title"
-  const normalizedContent = (content || "").replace(/^(#{1,6})([^ #\n])/gm, "$1 $2");
+  // Normalize headings missing a space after '#', e.g., "#Title" -> "# Title"
+  const normalizedContent = (content || "").replace(
+    /^(#{1,6})([^ #\n])/gm,
+    "$1 $2"
+  );
   return (
     <div className={cn("prose prose-lg max-w-full text-pretty", className)}>
       <ReactMarkdown

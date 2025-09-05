@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-/**
- * Formats validation errors from Zod for display
- */
+// Format Zod validation errors for display
 export const formatValidationErrors = (error: any): Record<string, string> => {
   const formattedErrors: Record<string, string> = {};
 
@@ -18,9 +16,7 @@ export const formatValidationErrors = (error: any): Record<string, string> => {
   return formattedErrors;
 };
 
-/**
- * Gets the first error message for a specific field
- */
+// Get the first error message for a field
 export const getFieldError = (
   errors: Record<string, string> | undefined,
   field: string,
@@ -29,9 +25,7 @@ export const getFieldError = (
   return errors[field];
 };
 
-/**
- * Checks if a field has an error
- */
+// Does a field have an error?
 export const hasFieldError = (
   errors: Record<string, string> | undefined,
   field: string,
@@ -39,20 +33,16 @@ export const hasFieldError = (
   return !!getFieldError(errors, field);
 };
 
-/**
- * Sanitizes input strings to prevent XSS and other attacks
- */
+// Sanitize input strings
 export const sanitizeInput = (input: string): string => {
   return input
     .trim()
-    .replace(/[<>]/g, "") // Remove potential HTML tags
-    .replace(/javascript:/gi, "") // Remove javascript: protocol
-    .replace(/on\w+=/gi, ""); // Remove event handlers
+    .replace(/[<>]/g, "")
+    .replace(/javascript:/gi, "")
+    .replace(/on\w+=/gi, "");
 };
 
-/**
- * Validates and sanitizes a URL
- */
+// Validate and sanitize a URL
 export const validateAndSanitizeUrl = (url: string): string | null => {
   try {
     const sanitized = sanitizeInput(url);
@@ -76,34 +66,28 @@ export const validateAndSanitizeUrl = (url: string): string | null => {
   }
 };
 
-/**
- * Truncates text to a specified length with ellipsis
- */
+// Truncate text to a specified length with ellipsis
 export const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trim() + "...";
 };
 
-/**
- * Generates a slug from a string
- */
+// Generate a slug from a string
 export const generateSlug = (text: string): string => {
   return text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, "") // Remove special characters
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
-    .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 };
 
-/**
- * Validates file upload (for images)
- */
+// Validate image file upload
 export const validateImageFile = (
   file: File,
 ): { isValid: boolean; error?: string } => {
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 5 * 1024 * 1024;
   const allowedTypes = [
     "image/jpeg",
     "image/jpg",
@@ -126,9 +110,7 @@ export const validateImageFile = (
   return { isValid: true };
 };
 
-/**
- * Debounces a function call
- */
+// Debounce a function
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number,
@@ -141,9 +123,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
-/**
- * Throttles a function call
- */
+// Throttle a function
 export const throttle = <T extends (...args: any[]) => any>(
   func: T,
   limit: number,
@@ -159,9 +139,7 @@ export const throttle = <T extends (...args: any[]) => any>(
   };
 };
 
-/**
- * Formats a date for display
- */
+// Format a date for display
 export const formatDate = (date: Date | string): string => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
@@ -176,9 +154,7 @@ export const formatDate = (date: Date | string): string => {
   }).format(dateObj);
 };
 
-/**
- * Formats a relative time (e.g., "2 hours ago")
- */
+// Format a relative time (e.g., "2 hours ago")
 export const formatRelativeTime = (date: Date | string): string => {
   const dateObj = typeof date === "string" ? new Date(date) : date;
   const now = new Date();

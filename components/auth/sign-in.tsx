@@ -140,7 +140,7 @@ export default function SigninModal({
             />
           </div>
 
-          {/* Removed Remember me and Forgot password */}
+
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (

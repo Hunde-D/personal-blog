@@ -93,14 +93,14 @@ export const PostSelectSchema = z.object({
     .optional(),
 });
 
-// Helper function to calculate read time from content
+// Estimate reading time from content length
 export const calculateReadTime = (content: string): number => {
   const wordsPerMinute = 200;
   const wordCount = content.split(/\s+/).length;
   return Math.ceil(wordCount / wordsPerMinute);
 };
 
-// New schema for post search
+// Schema for post search
 export const PostSearchSchema = z.object({
   query: z
     .string()

@@ -23,12 +23,12 @@ import SigninModal from "../auth/sign-in";
 
 export function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
 
-  // Fetch user session on mount and set up auth state listener
   const fetchUser = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -49,7 +49,6 @@ export function Navigation() {
   useEffect(() => {
     fetchUser();
 
-    // Set up authentication state listener using better-auth
     const checkAuthState = async () => {
       try {
         const { data: session } = await authClient.getSession();
@@ -66,8 +65,7 @@ export function Navigation() {
       }
     };
 
-    // Check auth state periodically and on focus
-    const interval = setInterval(checkAuthState, 5000); // Check every 5 seconds
+    const interval = setInterval(checkAuthState, 5000);
     const handleFocus = () => checkAuthState();
 
     window.addEventListener("focus", handleFocus);
@@ -78,7 +76,6 @@ export function Navigation() {
     };
   }, [fetchUser]);
 
-  // Refresh user session when pathname changes (for better sync)
   useEffect(() => {
     if (pathname.startsWith("/editor") && !user && !isLoading) {
       fetchUser();
@@ -127,12 +124,10 @@ export function Navigation() {
             </Link>
           ))}
 
-          {/* Admin Navigation - Show immediately when user is authenticated */}
           {user && !isLoading && (
             <OwnerNav closeMenu={() => {}} pathname={pathname} />
           )}
 
-          {/* Loading state for admin navigation */}
           {isLoading && (
             <div className="flex items-center gap-4">
               <Separator orientation="vertical" />
@@ -168,7 +163,6 @@ export function Navigation() {
         </button>
       </div>
 
-      {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="md:hidden mt-4 pb-4 border-t border-border">
           <div className="flex flex-col gap-4 pt-4">
@@ -188,22 +182,16 @@ export function Navigation() {
               </Link>
             ))}
 
-            {/* Mobile Admin Navigation */}
             {user && (
               <OwnerNav
                 closeMenu={() => setIsMenuOpen(false)}
                 pathname={pathname}
               />
             )}
-            <OwnerNav
-              closeMenu={() => setIsMenuOpen(false)}
-              pathname={pathname}
-            />
           </div>
         </div>
       )}
 
-      {/* User Profile Dialog */}
       <Dialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -213,7 +201,6 @@ export function Navigation() {
           </DialogHeader>
 
           <div className="space-y-6">
-            {/* Avatar and Basic Info */}
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="size-20 ring-4 ring-primary/20 hover:cursor-pointer">
                 <AvatarImage src={user?.image} />
@@ -246,11 +233,9 @@ export function Navigation() {
 
             <Separator />
 
-            {/* Actions */}
             <div className="space-y-3">
               {user ? (
                 <>
-                  {/* Admin Actions */}
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-center text-muted-foreground">
                       Admin Actions
@@ -261,8 +246,7 @@ export function Navigation() {
                         size="sm"
                         onClick={() => {
                           setIsProfileDialogOpen(false);
-                          // Navigate to manage posts
-                          window.location.href = "/editor/manage";
+                          router.push("/editor/manage");
                         }}
                         className="w-full"
                       >
@@ -274,8 +258,7 @@ export function Navigation() {
                         size="sm"
                         onClick={() => {
                           setIsProfileDialogOpen(false);
-                          // Navigate to new post
-                          window.location.href = "/editor";
+                          router.push("/editor");
                         }}
                         className="w-full"
                       >
@@ -285,7 +268,6 @@ export function Navigation() {
                     </div>
                   </div>
 
-                  {/* Sign Out */}
                   <Button
                     variant="destructive"
                     size="sm"
@@ -294,7 +276,7 @@ export function Navigation() {
                       await authClient.signOut({
                         fetchOptions: {
                           onSuccess: () => {
-                            window.location.href = "/";
+                            router.push("/");
                           },
                         },
                       });
@@ -307,7 +289,6 @@ export function Navigation() {
                 </>
               ) : (
                 <>
-                  {/* About Section */}
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-center text-muted-foreground">
                       About This Blog
@@ -319,7 +300,6 @@ export function Navigation() {
                     </p>
                   </div>
 
-                  {/* Admin Access */}
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-center text-muted-foreground">
                       Admin Access
@@ -332,7 +312,6 @@ export function Navigation() {
                     </SigninModal>
                   </div>
 
-                  {/* External Links */}
                   <div className="space-y-2">
                     <h4 className="text-sm font-medium text-center text-muted-foreground">
                       More About Me
@@ -343,7 +322,7 @@ export function Navigation() {
                         size="sm"
                         onClick={() => {
                           setIsProfileDialogOpen(false);
-                          window.location.href = "/about";
+                          router.push("/about");
                         }}
                         className="flex-1"
                       >
@@ -355,7 +334,7 @@ export function Navigation() {
                         size="sm"
                         onClick={() => {
                           setIsProfileDialogOpen(false);
-                          window.location.href = "/newsletter";
+                          router.push("/newsletter");
                         }}
                         className="flex-1"
                       >

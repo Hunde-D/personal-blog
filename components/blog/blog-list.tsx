@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input";
 
 export const BlogList = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  // Search-only (no tag/status filter on public blog)
 
   const {
     posts,
@@ -35,7 +34,6 @@ export const BlogList = () => {
 
   return (
     <>
-      {/* Search only */}
       <div className="mb-8">
         <div className="relative max-w-xl">
           <Input
@@ -66,7 +64,6 @@ export const BlogList = () => {
               <p className="text-muted-foreground leading-relaxed">
                 {post.excerpt}
               </p>
-              {/* Tags (display only) */}
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-3">
                   {post.tags.map((tag) => (

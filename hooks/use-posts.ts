@@ -37,7 +37,7 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
   const searchParams = useSearchParams();
 
   const queryParam = useMemo(() => {
-    // Use provided query option first, then fall back to URL params
+    // Prefer explicit query option, otherwise read from URL params
     if (queryOption !== undefined) {
       return queryOption && queryOption.trim() ? queryOption.trim() : undefined;
     }
@@ -86,7 +86,7 @@ export const usePosts = (options: UsePostsOptions = {}): UsePostsReturn => {
         }
       );
 
-  // Transform the data to match our expected type
+  // Normalize posts so downstream components get consistent shapes
   const transformPosts = (posts: any[]) =>
     posts.map((post) => ({
       ...post,

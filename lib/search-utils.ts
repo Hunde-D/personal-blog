@@ -1,12 +1,4 @@
-/**
- * Utility functions for search functionality
- */
-
-/**
- * Sanitizes and processes search queries for PostgreSQL full-text search
- * @param query - Raw search query from user input
- * @returns Processed query string suitable for PostgreSQL full-text search
- */
+// Utilities for search and filtering
 export const processSearchQuery = (query: string): string => {
   if (!query || typeof query !== "string") {
     return "";
@@ -26,11 +18,7 @@ export const processSearchQuery = (query: string): string => {
   return words.join(" & ");
 };
 
-/**
- * Builds Prisma where clause for tag-based filtering
- * @param filters - Filter options including status, tags, and date range
- * @returns Prisma where clause object
- */
+// Build Prisma where clause for tag-based filtering
 export const buildTagFilterWhere = (filters: {
   status?: "all" | "published" | "draft";
   tags?: Array<{ id?: string; name: string }>;
@@ -75,12 +63,7 @@ export const buildTagFilterWhere = (filters: {
   return where;
 };
 
-/**
- * Builds Prisma where clause for post search
- * @param query - Search query string
- * @param publishedOnly - Whether to filter for published posts only
- * @returns Prisma where clause object
- */
+// Build Prisma where clause for post search
 export const buildPostSearchWhere = (query?: string, publishedOnly = false) => {
   const where: any = {};
 
@@ -104,12 +87,7 @@ export const buildPostSearchWhere = (query?: string, publishedOnly = false) => {
   return where;
 };
 
-/**
- * Validates search query parameters
- * @param query - Search query string
- * @param limit - Number of results to return
- * @returns Validation result with sanitized values
- */
+// Validate search query parameters
 export const validateSearchParams = (query?: string, limit?: number) => {
   const errors: string[] = [];
 

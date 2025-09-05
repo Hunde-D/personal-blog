@@ -31,7 +31,6 @@ export const TagInput = ({
   const [isInputFocused, setIsInputFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch existing tags for suggestions
   const { data: existingTagsData = [] } = api.post.getTags.useQuery();
   const existingTags: TagOption[] = existingTagsData as TagOption[];
 
@@ -44,18 +43,15 @@ export const TagInput = ({
 
     const lower = trimmed.toLowerCase();
 
-    // Prevent duplicates by name (case-insensitive)
     if (tags.some((t) => t.name.toLowerCase() === lower)) {
       setInputValue("");
       return;
     }
 
-    // Check if we've reached the maximum number of tags
     if (tags.length >= maxTags) {
       return;
     }
 
-    // If a suggestion exists for this name, use its id to connect instead of creating new
     const existing = fromSuggestion
       ? (tag as { id: string; name: string })
       : existingTags.find((t: TagOption) => t.name.toLowerCase() === lower);
@@ -66,7 +62,6 @@ export const TagInput = ({
       return;
     }
 
-    // Otherwise create a new tag with the typed casing preserved
     onTagsChange([...tags, { name: trimmed }]);
     setInputValue("");
   };
@@ -80,13 +75,11 @@ export const TagInput = ({
       e.preventDefault();
       handleAddTag(inputValue);
     } else if (e.key === "Backspace" && !inputValue && tags.length > 0) {
-      // Remove last tag on backspace if input is empty
       handleRemoveTag(tags[tags.length - 1].name);
     }
   };
 
   const handleInputBlur = () => {
-    // Add tag on blur if there's input
     if (inputValue.trim()) {
       handleAddTag(inputValue);
     }
@@ -97,14 +90,12 @@ export const TagInput = ({
     setIsInputFocused(true);
   };
 
-  // Filter existing tags to show only those not already selected
   const availableTags = existingTags
     .filter((tag: TagOption) => !tags.some((t) => t.name === tag.name))
-    .slice(0, 8); // Show suggestions
+    .slice(0, 8);
 
   return (
     <div className={cn("space-y-3", className)}>
-      {/* Tags Display */}
       {tags.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {tags.map((tag) => (
@@ -122,7 +113,6 @@ export const TagInput = ({
         </div>
       )}
 
-      {/* Tag Input */}
       <div className="relative">
         <Input
           ref={inputRef}
@@ -138,7 +128,6 @@ export const TagInput = ({
           className="pr-20"
         />
 
-        {/* Add Button */}
         {inputValue.trim() && (
           <Button
             type="button"
@@ -152,7 +141,6 @@ export const TagInput = ({
         )}
       </div>
 
-      {/* Tag Suggestions */}
       {isInputFocused && (
         <div className="absolute z-50 mt-1 w-full bg-background border border-border rounded-md shadow-lg max-h-48 overflow-y-auto">
           {availableTags
@@ -201,7 +189,6 @@ export const TagInput = ({
         </div>
       )}
 
-      {/* Help Text */}
       <p className="text-xs text-muted-foreground">
         Press Enter or comma to add tags. Maximum {maxTags} tags allowed.
       </p>

@@ -17,14 +17,14 @@ import {
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 
 export const postRouter = createTRPCRouter({
-  // Unified list procedure that handles both published and all posts
+  // List posts (all)
   list: publicProcedure
     .input(PostSelectSchema)
     .query(async ({ ctx, input }) => {
       try {
         const { limit, cursor, query } = input;
 
-        // Validate and sanitize input parameters
+        // Validate and sanitize input
         const validation = validateSearchParams(query, limit);
         if (!validation.isValid) {
           throw new TRPCError({
@@ -33,7 +33,7 @@ export const postRouter = createTRPCRouter({
           });
         }
 
-        // Build where clause for search
+        // Build search where clause
         const where = buildPostSearchWhere(validation.sanitizedQuery, false);
 
         const posts = await ctx.db.post.findMany({
@@ -75,14 +75,14 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  // Convenience procedure for published posts only
+  // List posts (published only)
   listPublished: publicProcedure
     .input(PostSelectSchema)
     .query(async ({ ctx, input }) => {
       try {
         const { limit, cursor, query } = input;
 
-        // Validate and sanitize input parameters
+        // Validate and sanitize input
         const validation = validateSearchParams(query, limit);
         if (!validation.isValid) {
           throw new TRPCError({
@@ -91,7 +91,7 @@ export const postRouter = createTRPCRouter({
           });
         }
 
-        // Build where clause for published posts only
+        // Build where clause for published posts
         const where = buildPostSearchWhere(validation.sanitizedQuery, true);
 
         const posts = await ctx.db.post.findMany({
@@ -175,7 +175,7 @@ export const postRouter = createTRPCRouter({
       }
     }),
 
-  // Get all available tags
+  // Get all available tags with counts
   getTags: publicProcedure.query(async ({ ctx }) => {
     try {
       const tags = await ctx.db.tag.findMany({
@@ -188,7 +188,7 @@ export const postRouter = createTRPCRouter({
         },
       });
 
-      // Get post count for each tag
+      // Attach post count per tag
       const tagsWithCount = await Promise.all(
         tags.map(async (tag) => {
           const postCount = await ctx.db.post.count({
@@ -209,7 +209,7 @@ export const postRouter = createTRPCRouter({
         })
       );
 
-      // Sort by post count descending
+      // Sort by post count (desc)
       return tagsWithCount.sort((a, b) => b.postCount - a.postCount);
     } catch (error) {
       throw new TRPCError({
@@ -220,14 +220,14 @@ export const postRouter = createTRPCRouter({
     }
   }),
 
-  // Enhanced list procedure with tag filtering
+  // List posts with tag/status/date filters
   listWithFilters: publicProcedure
     .input(PostFilterSchema)
     .query(async ({ ctx, input }) => {
       try {
         const { limit = 10, cursor, status, tags, dateRange } = input;
 
-        // Build where clause with filters
+        // Build where clause from filters
         const where = buildTagFilterWhere({
           status,
           tags,
@@ -280,10 +280,13 @@ export const postRouter = createTRPCRouter({
       .input(PostCreateSchema)
       .mutation(async ({ ctx, input }) => {
         try {
-          // Decide slug: user-provided or generated from title
-          const desiredSlug = input.slug && input.slug.trim().length > 0 ? input.slug : slug(input.title);
+          // Choose slug: user-provided or generated from title
+          const desiredSlug =
+            input.slug && input.slug.trim().length > 0
+              ? input.slug
+              : slug(input.title);
 
-          // Check if slug already exists
+          // Ensure slug is unique
           const existingPost = await ctx.db.post.findUnique({
             where: { slug: desiredSlug },
           });
@@ -295,7 +298,7 @@ export const postRouter = createTRPCRouter({
             });
           }
 
-          // Calculate read time from content
+          // Compute read time from content
           const readTimeMin = calculateReadTime(input.content);
 
           const result = await ctx.db.post.create({
@@ -337,7 +340,7 @@ export const postRouter = createTRPCRouter({
         try {
           const { id, title, ...rest } = input;
 
-          // Check if post exists and user has permission
+          // Ensure post exists and user owns it
           const existingPost = await ctx.db.post.findUnique({
             where: { id },
             select: { authorId: true, slug: true },
@@ -357,13 +360,18 @@ export const postRouter = createTRPCRouter({
             });
           }
 
-          // Handle slug update: explicit slug takes precedence; otherwise derive from title change
+          // Slug update: explicit slug wins; otherwise derive from title
           let slugUpdate = {} as any;
           if (rest.slug && rest.slug !== existingPost.slug) {
-            // Validate uniqueness of provided slug
-            const providedExists = await ctx.db.post.findUnique({ where: { slug: rest.slug } });
+            // Check provided slug uniqueness
+            const providedExists = await ctx.db.post.findUnique({
+              where: { slug: rest.slug },
+            });
             if (providedExists && providedExists.id !== id) {
-              throw new TRPCError({ code: "CONFLICT", message: "Slug already in use" });
+              throw new TRPCError({
+                code: "CONFLICT",
+                message: "Slug already in use",
+              });
             }
             slugUpdate = { slug: rest.slug };
           } else if (title) {
@@ -384,13 +392,13 @@ export const postRouter = createTRPCRouter({
             slugUpdate = { slug: newSlug };
           }
 
-          // Calculate read time if content changes
+          // Recompute read time if content changed
           let readTimeUpdate = {};
           if (rest.content) {
             readTimeUpdate = { readTimeMin: calculateReadTime(rest.content) };
           }
 
-          // Handle publishedAt update
+          // Update publishedAt if published flag changed
           let publishedAtUpdate = {};
           if (rest.published !== undefined) {
             publishedAtUpdate = {
@@ -398,10 +406,10 @@ export const postRouter = createTRPCRouter({
             };
           }
 
-          // Handle tags update
+          // Replace tags if provided
           let tagsUpdate = {};
           if (rest.tags !== undefined) {
-            // First, disconnect all existing tags
+            // Disconnect all existing tags
             await ctx.db.post.update({
               where: { id },
               data: {
@@ -411,7 +419,7 @@ export const postRouter = createTRPCRouter({
               },
             });
 
-            // Then connect or create new tags
+            // Connect or create new tags
             tagsUpdate = {
               tags: {
                 connectOrCreate: rest.tags.map((tag) => ({
@@ -462,7 +470,7 @@ export const postRouter = createTRPCRouter({
       )
       .mutation(async ({ ctx, input }) => {
         try {
-          // Check if post exists and user has permission
+          // Ensure post exists and user owns it
           const existingPost = await ctx.db.post.findUnique({
             where: { id: input.id },
             select: { authorId: true },

@@ -1,6 +1,6 @@
 import z from "zod";
 
-// Sign in validation schema
+// Sign in
 export const SignInSchema = z.object({
   email: z
     .string()
@@ -15,7 +15,7 @@ export const SignInSchema = z.object({
     .max(128, "Password must be less than 128 characters"),
 });
 
-// Sign up validation schema
+// Sign up
 export const SignUpSchema = z
   .object({
     name: z
@@ -53,7 +53,7 @@ export const SignUpSchema = z
     path: ["confirmPassword"],
   });
 
-// Password reset request schema
+// Password reset request
 export const PasswordResetRequestSchema = z.object({
   email: z
     .string()
@@ -63,7 +63,7 @@ export const PasswordResetRequestSchema = z.object({
     .toLowerCase(),
 });
 
-// Password reset schema
+// Password reset
 export const PasswordResetSchema = z
   .object({
     token: z.string().min(1, "Reset token is required"),
@@ -86,7 +86,7 @@ export const PasswordResetSchema = z
     path: ["confirmPassword"],
   });
 
-// Profile update schema
+// Profile update
 export const ProfileUpdateSchema = z.object({
   name: z
     .string()
@@ -125,7 +125,7 @@ export type PasswordResetRequestInput = z.infer<
 export type PasswordResetInput = z.infer<typeof PasswordResetSchema>;
 export type ProfileUpdateInput = z.infer<typeof ProfileUpdateSchema>;
 
-// Validation helper functions
+// Validation helpers
 export const validatePassword = (
   password: string,
 ): { isValid: boolean; errors: string[] } => {

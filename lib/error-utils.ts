@@ -1,11 +1,7 @@
 import { TRPCClientError } from "@trpc/client";
 import type { AppRouter } from "@/server/api/root";
 
-/**
- * Extracts user-friendly error message from tRPC errors
- * @param error - tRPC client error
- * @returns User-friendly error message
- */
+// Extract a user-friendly message from tRPC errors
 export const getErrorMessage = (error: TRPCClientError<AppRouter>): string => {
   // Handle specific error codes
   switch (error.data?.code) {
@@ -28,24 +24,16 @@ export const getErrorMessage = (error: TRPCClientError<AppRouter>): string => {
   }
 };
 
-/**
- * Checks if an error is a tRPC client error
- * @param error - Any error object
- * @returns True if it's a tRPC client error
- */
+// Type guard for tRPC client errors
 export const isTRPCClientError = (
   error: unknown,
 ): error is TRPCClientError<AppRouter> => {
   return error instanceof TRPCClientError;
 };
 
-/**
- * Formats error for display in UI
- * @param error - Any error object
- * @returns Formatted error message
- */
+// Format error for display in UI
 export const formatError = (error: unknown): string => {
-  // Helper to extract messages if error.message contains a JSON array of issues
+  // Parse messages if error.message contains a JSON array of issues
   const parseArrayMessage = (msg: unknown): string | null => {
     if (typeof msg !== "string") return null;
     const trimmed = msg.trim();
@@ -75,11 +63,11 @@ export const formatError = (error: unknown): string => {
   };
 
   if (isTRPCClientError(error)) {
-    // If server included a JSON-array string of issues in message, parse it
+    // Parse JSON-array messages if present
     const parsed = parseArrayMessage((error as any)?.message);
     if (parsed) return parsed;
 
-    // Attempt to extract zodError structure if provided
+    // Prefer zodError messages if provided
     const anyErr: any = error as any;
     const zodError = anyErr?.data?.zodError;
     if (zodError) {

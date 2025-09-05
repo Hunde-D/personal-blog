@@ -30,7 +30,7 @@ export const EditorForm = ({
   const [viewMode, setViewMode] = useState<"write" | "preview">("write");
   const [slugEdited, setSlugEdited] = useState(false);
 
-  // Validate form data in real-time
+  // Validate as the user edits so we can show helpful inline errors
   useEffect(() => {
     try {
       PostCreateSchema.parse({
@@ -64,20 +64,20 @@ export const EditorForm = ({
 
   const handleChange = (
     field: keyof PostCT,
-    value: string | boolean | Array<{ id?: string; name: string }>,
+    value: string | boolean | Array<{ id?: string; name: string }>
   ) => {
-    // Do not sanitize markdown content; preserve symbols and whitespace
+    // Leave markdown as-is; we only validate length client-side
     if (field === "content") {
       setPostData({ ...postData, [field]: value as string });
       return;
     }
 
-    // If user edits slug manually, stop auto-sync
+    // If the slug is edited manually, stop auto-syncing it from the title
     if (field === ("slug" as keyof PostCT)) {
       setSlugEdited(true);
     }
 
-    // Allow spaces and markdown characters in inputs; defer sanitization to server or submit-time
+    // Keep user input intact; any sanitization happens on submit/server
     setPostData({ ...postData, [field]: value as any });
   };
 
@@ -93,9 +93,8 @@ export const EditorForm = ({
   const readTime = calculateReadTime(postData.content);
   const wordCount = postData.content.split(/\s+/).filter(Boolean).length;
 
-  // Auto-generate slug from title if user hasn't edited slug manually
+  // Auto-generate the slug from the title unless the user chose to override it
   useEffect(() => {
-    // Keep slug in sync with title unless user edited slug manually
     if (slugEdited) return;
     const auto = (postData.title || "")
       .toLowerCase()
@@ -152,9 +151,7 @@ export const EditorForm = ({
         />
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">
-            Tags
-          </label>
+          <label className="text-sm font-medium">Tags</label>
           <TagInput
             tags={postData.tags || []}
             onTagsChange={(tags) => handleChange("tags", tags)}
@@ -173,14 +170,22 @@ export const EditorForm = ({
           <div className="inline-flex rounded-md border border-border overflow-hidden">
             <button
               type="button"
-              className={`px-3 py-1 text-sm ${viewMode === "write" ? "bg-accent text-accent-foreground" : "bg-background"}`}
+              className={`px-3 py-1 text-sm ${
+                viewMode === "write"
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-background"
+              }`}
               onClick={() => setViewMode("write")}
             >
               Write
             </button>
             <button
               type="button"
-              className={`px-3 py-1 text-sm border-l border-border ${viewMode === "preview" ? "bg-accent text-accent-foreground" : "bg-background"}`}
+              className={`px-3 py-1 text-sm border-l border-border ${
+                viewMode === "preview"
+                  ? "bg-accent text-accent-foreground"
+                  : "bg-background"
+              }`}
               onClick={() => setViewMode("preview")}
             >
               Preview

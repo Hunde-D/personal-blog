@@ -56,9 +56,7 @@ export const FilterBar = ({
 
   return (
     <div className={cn("space-y-4", className)}>
-      {/* Search and Filter Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
-        {/* Search Input */}
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -69,9 +67,13 @@ export const FilterBar = ({
           />
         </div>
 
-        {/* Status Filter */}
         {showStatusFilter && (
-          <Select value={status} onValueChange={(value: "all" | "published" | "draft") => onStatusChange(value)}>
+          <Select
+            value={status}
+            onValueChange={(value: "all" | "published" | "draft") =>
+              onStatusChange(value)
+            }
+          >
             <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -83,7 +85,6 @@ export const FilterBar = ({
           </Select>
         )}
 
-        {/* Clear Filters Button */}
         {hasActiveFilters && (
           <Button
             variant="outline"
@@ -97,7 +98,6 @@ export const FilterBar = ({
         )}
       </div>
 
-      {/* Tag Filter */}
       {showTagFilter && (
         <TagFilter
           selectedTags={selectedTags}
@@ -106,14 +106,12 @@ export const FilterBar = ({
         />
       )}
 
-      {/* Active Filters Summary */}
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
           <span>Active filters:</span>
           {searchTerm && (
             <Badge variant="secondary" className="flex items-center gap-1">
-              <Search className="h-3 w-3" />
-              "{searchTerm}"
+              <Search className="h-3 w-3" />"{searchTerm}"
               <button
                 onClick={() => {
                   setLocalSearchTerm("");
@@ -145,7 +143,9 @@ export const FilterBar = ({
             >
               <span>#{tag.name}</span>
               <button
-                onClick={() => onTagsChange(selectedTags.filter((t) => t.name !== tag.name))}
+                onClick={() =>
+                  onTagsChange(selectedTags.filter((t) => t.name !== tag.name))
+                }
                 className="ml-1 hover:text-foreground"
               >
                 <X className="h-3 w-3" />
