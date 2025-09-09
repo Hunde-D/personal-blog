@@ -140,8 +140,6 @@ export default function SigninModal({
             />
           </div>
 
-
-
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <>
@@ -152,6 +150,11 @@ export default function SigninModal({
               "Sign in"
             )}
           </Button>
+          <div>
+            <p>Demo Credential</p>
+            <p>Email: hunde.ddh@gmail.com</p>
+            <p>Password: hundepass</p>
+          </div>
 
           {errors.form && (
             <p className="text-destructive text-sm text-center">

@@ -124,11 +124,7 @@ export function Navigation() {
             </Link>
           ))}
 
-          {user && !isLoading && (
-            <OwnerNav closeMenu={() => {}} pathname={pathname} />
-          )}
-
-          {isLoading && (
+          {isLoading ? (
             <div className="flex items-center gap-4">
               <Separator orientation="vertical" />
               <div className="flex items-center gap-4">
@@ -136,6 +132,15 @@ export function Navigation() {
                 <div className="animate-pulse bg-muted rounded w-16 h-4" />
               </div>
             </div>
+          ) : user ? (
+            <OwnerNav closeMenu={() => {}} pathname={pathname} />
+          ) : (
+            <SigninModal>
+              <Button>
+                <Shield className="mr-2 h-4 w-4" />
+                Continue as Admin
+              </Button>
+            </SigninModal>
           )}
 
           <ModeToggle />
