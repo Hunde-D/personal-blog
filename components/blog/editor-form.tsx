@@ -6,10 +6,11 @@ import {
 } from "@/components/ui/form-field";
 import { PostCreateSchema, type PostCreateInput } from "./validation";
 import { calculateReadTime } from "./validation";
-import { sanitizeInput, validateAndSanitizeUrl } from "@/lib/form-utils";
+import { validateAndSanitizeUrl } from "@/lib/form-utils";
 import { useState, useEffect } from "react";
 import { TagInput } from "./tag-input";
 import { MarkdownRenderer } from "./markdown-renderer";
+import slug from "slug";
 
 type EditorFormProps = {
   postData: PostCT;
@@ -30,7 +31,6 @@ export const EditorForm = ({
   const [viewMode, setViewMode] = useState<"write" | "preview">("write");
   const [slugEdited, setSlugEdited] = useState(false);
 
-  // Validate as the user edits so we can show helpful inline errors
   useEffect(() => {
     try {
       PostCreateSchema.parse({
@@ -66,18 +66,15 @@ export const EditorForm = ({
     field: keyof PostCT,
     value: string | boolean | Array<{ id?: string; name: string }>
   ) => {
-    // Leave markdown as-is; we only validate length client-side
     if (field === "content") {
       setPostData({ ...postData, [field]: value as string });
       return;
     }
 
-    // If the slug is edited manually, stop auto-syncing it from the title
     if (field === ("slug" as keyof PostCT)) {
       setSlugEdited(true);
     }
 
-    // Keep user input intact; any sanitization happens on submit/server
     setPostData({ ...postData, [field]: value as any });
   };
 
@@ -93,18 +90,10 @@ export const EditorForm = ({
   const readTime = calculateReadTime(postData.content);
   const wordCount = postData.content.split(/\s+/).filter(Boolean).length;
 
-  // Auto-generate the slug from the title unless the user chose to override it
   useEffect(() => {
     if (slugEdited) return;
-    const auto = (postData.title || "")
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-");
-
+    const auto = slug(postData.title);
     setPostData({ ...postData, slug: auto });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postData.title, slugEdited]);
 
   return (

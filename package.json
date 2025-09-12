@@ -54,6 +54,7 @@
     "sonner": "^2.0.7",
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.1",
+    "ws": "^8.18.3",
     "zod": "^4.1.1"
   },
   "devDependencies": {
@@ -64,6 +65,7 @@
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/slug": "^5.0.9",
+    "@types/ws": "^8.18.1",
     "prisma": "^6.14.0",
     "tailwindcss": "^4",
     "tsx": "^4.20.5",

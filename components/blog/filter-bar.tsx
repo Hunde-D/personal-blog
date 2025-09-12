@@ -5,7 +5,13 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { TagFilter } from "./tag-filter";
 import { cn } from "@/lib/utils";
 
@@ -40,12 +46,13 @@ export const FilterBar = ({
   useEffect(() => {
     const timer = setTimeout(() => {
       onSearchChange(localSearchTerm);
-    }, 300);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [localSearchTerm, onSearchChange]);
 
-  const hasActiveFilters = searchTerm || selectedTags.length > 0 || status !== "all";
+  const hasActiveFilters =
+    searchTerm || selectedTags.length > 0 || status !== "all";
 
   const clearAllFilters = () => {
     setLocalSearchTerm("");
